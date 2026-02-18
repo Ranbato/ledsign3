@@ -495,7 +495,7 @@ public class Script
 			while((line = dis.readLine()) != null)
 			{
 				line = line.trim();
-				if(!(line.startsWith("!!")) && (line.length() != 0))
+				if(!(line.startsWith("!!")) && (!line.isEmpty()))
 				{
 					listlen++;
 					ptr.fi = getFunc(line);

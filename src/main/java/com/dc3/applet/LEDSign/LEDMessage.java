@@ -73,7 +73,7 @@ class LEDMessage
 		{
 			index = let.getLetter(fi.text.charAt(i));
 
-			if(fi.color.length() > 0)
+			if(!fi.color.isEmpty())
 				try
 				{
 					c = fi.color.charAt(i);
