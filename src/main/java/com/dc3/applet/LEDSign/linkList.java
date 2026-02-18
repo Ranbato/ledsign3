@@ -7,10 +7,6 @@
 
 package com.dc3.applet.LEDSign;
 
-import java.awt.*;
-import java.io.*;
-import java.util.*;
-import java.net.*;
 
 // A hacked linked list
 public class linkList

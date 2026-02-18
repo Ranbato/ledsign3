@@ -20,7 +20,6 @@ import java.io.*;
 import java.util.*;
 import java.net.*;
 import java.time.LocalDateTime;
-import java.time.DayOfWeek;
 
 //=============================================================================
 // Function		  Code
@@ -89,7 +88,7 @@ public class Script
 					else
 					{
 						tmp = tmp.substring(i);
-						if(tmp.indexOf(" ") != -1)
+						if(tmp.contains(" "))
 							tmp = tmp.substring(0,tmp.indexOf(" "));
 					}
 					tmp.trim();
@@ -104,21 +103,20 @@ public class Script
 
 	private FuncInfo getFunc(String s)
 	{
-		int i;
 		String tmp;
 		FuncInfo fi = new FuncInfo();
 
-		fi.func = -1;
+		fi.func = null;
 		fi.delay = 40;
 		fi.startspace = 10;
 		fi.endspace = 20;
 		fi.times = -1;
 		fi.remaining = 0;
 		fi.centered = false;
-		fi.color = new String("");
-		fi.text = new String("No text specified");
+		fi.color = "";
+		fi.text = "No text specified";
 		fi.url = null;
-		fi.target = new String("");
+		fi.target = "";
 		fi.script = null;
 		fi.ret = null;
 
@@ -127,13 +125,13 @@ public class Script
 		String tmp2;
 		tmp2 = getParam(s,"delay");
 		if(tmp2 != null)
-			fi.delay = (new Integer(tmp2)).intValue();
+			fi.delay = Integer.parseInt(tmp2);
 
 		tmp2 = getParam(s,"clear");
 		if(tmp2 != null && tmp2.compareTo("true") == 0)
 		{
 			fi.centered = true;
-			fi.text = new String("");
+			fi.text = "";
 		}
 		else
 		{
@@ -145,11 +143,11 @@ public class Script
 				fi.centered = false;
 				tmp2 = getParam(s,"startspace");
 				if(tmp2 != null)
-					fi.startspace = (new Integer(tmp2)).intValue();
+					fi.startspace = Integer.parseInt(tmp2);
 
 				tmp2 = getParam(s,"endspace");
 				if(tmp2 != null)
-					fi.endspace = (new Integer(tmp2)).intValue();
+					fi.endspace = Integer.parseInt(tmp2);
 			}
 
 			tmp2 = getParam(s,"text");
@@ -160,14 +158,14 @@ public class Script
 		tmp2 = getParam(s,"times");
 		if(tmp2 != null)
 		{
-			fi.times = (new Integer(tmp2)).intValue();
+			fi.times = Integer.parseInt(tmp2);
 			fi.remaining = fi.times;
 		}
 
 		tmp2 = getParam(s,"pixels");
 		if(tmp2 != null)
 		{
-			fi.times = (new Integer(tmp2)).intValue();
+			fi.times = Integer.parseInt(tmp2);
 			fi.remaining = fi.times;
 		}
 
@@ -193,89 +191,28 @@ public class Script
 
 		fi.script = getParam(s,"script");
 
-		i = s.indexOf(" ");
+		int i = s.indexOf(" ");
+		String funcName;
 		if(i != -1)
-			tmp = s.substring(0,i);
+			funcName = s.substring(0,i);
 		else
-			tmp = s;
+			funcName = s;
 
-		if(tmp.compareTo("Appear") == 0)
+		// Parse function name using enum
+		fi.func = LEDFunction.fromScriptName(funcName);
+
+		// Apply function-specific defaults
+		if(fi.func == LEDFunction.PIXEL)
 		{
-			fi.func = 0;
-		}
-		else if(tmp.compareTo("Sleep") == 0)
-		{
-			fi.func = 1;
-		}
-		else if(tmp.compareTo("ScrollLeft") == 0)
-		{
-			fi.func = 2;
-		}
-		else if(tmp.compareTo("ScrollRight") == 0)
-		{
-			fi.func = 3;
-		}
-		else if(tmp.compareTo("ScrollUp") == 0)
-		{
-			fi.func = 4;
-		}
-		else if(tmp.compareTo("ScrollDown") == 0)
-		{
-			fi.func = 5;
-		}
-		else if(tmp.compareTo("Pixel") == 0)
-		{
-			fi.func = 6;
 			if(fi.delay < 1)
 				fi.delay = 1;
 			if(fi.times < 1)
 				fi.times = 15;
 		}
-		else if(tmp.compareTo("Blink") == 0)
+		else if(fi.func == LEDFunction.BLINK)
 		{
-			fi.func = 7;
 			if(fi.times < 1)
 				fi.times = 2;
-		}
-		else if(tmp.compareTo("OverRight") == 0)
-		{
-			fi.func = 8;
-		}
-		else if(tmp.compareTo("ScrollCenter") == 0)
-		{
-			fi.func = 9;
-		}
-		else if(tmp.compareTo("OverCenter") == 0)
-		{
-			fi.func = 10;
-		}
-		else if(tmp.compareTo("OverLeft") == 0)
-		{
-			fi.func = 11;
-		}
-		else if(tmp.compareTo("OverUp") == 0)
-		{
-			fi.func = 12;
-		}
-		else if(tmp.compareTo("OverDown") == 0)
-		{
-			fi.func = 13;
-		}
-		else if(tmp.compareTo("Do") == 0)
-		{
-			fi.func = 97;
-		}
-		else if(tmp.compareTo("Repeat") == 0)
-		{
-			fi.func = 98;
-		}
-		else if(tmp.compareTo("Reload") == 0)
-		{
-			fi.func = 99;
-		}
-		else if(tmp.compareTo("Chain") == 0)
-		{
-			fi.func = 100;
 		}
 
 		fi.store = fi.text;
@@ -296,10 +233,10 @@ public class Script
 
 		switch(fi.func)
 		{
-			case 97:
+			case DO:
 				fi = nextFunc();
 				break;
-			case 98:
+			case REPEAT:
 				if(fi.times >= 0)
 				{
 					fi.remaining--;
@@ -320,11 +257,15 @@ public class Script
 					fi = nextFunc();
 				}
 				break;
-			case 100:
+			case CHAIN:
 				scrpt = fi.script;
-			case 99:
+				// fall through to RELOAD
+			case RELOAD:
 				initScript();
 				fi = nextFunc();
+				break;
+			default:
+				// Other functions are handled elsewhere
 				break;
 		}
 
@@ -350,7 +291,7 @@ public class Script
 		String ddmmyy;
 		int min;
 		int pm;
-		// Replace legacy java.util.Date with java.time.LocalDateTime
+		// Use modern java.time.LocalDateTime
 		LocalDateTime date = LocalDateTime.now();
 		int a,b;
 		int i;
@@ -360,7 +301,7 @@ public class Script
 		tmp = fi.store;
 		fi.color = "";
 
-		if(fi.func == 0 || (fi.func >= 2 && fi.func <= 97))
+		if(fi.func == LEDFunction.APPEAR || (fi.func != null && fi.func.getCode() >= 2 && fi.func.getCode() <= 97))
 		{
 			c = 'r';
 			b = 0;
@@ -516,7 +457,7 @@ public class Script
 					fi.color = fi.color.concat((new Character(c)).toString());
 				}
 
-			}    // END - for(...)
+			}    // END - while(...)
 
 		} // END - if(fi.func == ...)
 
@@ -558,7 +499,7 @@ public class Script
 				{
 					listlen++;
 					ptr.fi = getFunc(line);
-					if(ptr.fi.func == 97)
+					if(ptr.fi.func == LEDFunction.DO)
 						dos++;
 					ptr.next = new linkList();
 					ptr = ptr.next;
@@ -570,13 +511,13 @@ public class Script
 			dos = 0;
 			for(a=0;a<listlen;a++)
 			{
-				if(ptr.fi.func == 97)
+				if(ptr.fi.func == LEDFunction.DO)
 				{
 					stack[dos] = new linkList();
 					stack[dos] = ptr;
 					dos++;
 				}
-				else if(ptr.fi.func == 98)
+				else if(ptr.fi.func == LEDFunction.REPEAT)
 				{
 					if(dos > 0)
 					{

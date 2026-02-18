@@ -43,7 +43,7 @@ public class LED extends java.applet.Applet implements Runnable
 	int ledsize; 					// The size of the LEDs
 
 	Color highlight; 				// Color used for highlight on large LEDs
-	Color colors[]; 				// The array of possible colors
+	Color[] colors; 				// The array of possible colors
 	LEDMessage msg; 				// The class that takes care of the message to be displayed
 	Color bhilite; 					// Normal border hilite color
 	Color bcolor; 					// Normal border color
@@ -62,7 +62,7 @@ public class LED extends java.applet.Applet implements Runnable
 	String currurl = appletName; 	// The current url that are set in the script
 	URL currURL = null;
 	URL lastURL = null;
-	String target = new String("");
+	String target = "";
 	int place;
 	int border; 					// The border width
 	int offset; 					// The offset for the sign from the upper left
@@ -74,7 +74,7 @@ public class LED extends java.applet.Applet implements Runnable
 	boolean done = false; 			// Is the transition done?
 	Image pixmapimg,offimg,tmpimg; 	// The pixmaps!!
 	Graphics pixmap,offmap,tmpmap; 	// Graphics for the pixmaps
-	Pixelize pix[]; 				// Array of "pixels" used during the Pixel transition
+	Pixelize[] pix; 				// Array of "pixels" used during the Pixel transition
 
 	//--------------------------------------------------------------------------
 	// PRIVATE void getAttrs() - Get the command arguments from the HTML
@@ -87,28 +87,28 @@ public class LED extends java.applet.Applet implements Runnable
 		Graphics gr;
 
 		if(getParameter("script") !=	null) {
-			scrpt = new String(getParameter("script"));
+			scrpt = getParameter("script");
 		} else {
 			throw(new RuntimeException("No script specified in HTML."));
 		}
 
 		if(getParameter("font") !=  null)
 		{
-			fnt = new String(getParameter("font"));
+			fnt = getParameter("font");
 		} else {
 			throw(new RuntimeException("No font specified in HTML."));
 		}
 
 		if(getParameter("spacewidth") !=  null)
 		{
-			swidth = (new Integer(new String(getParameter("spacewidth")))).intValue();
+			swidth = Integer.parseInt(getParameter("spacewidth"));
 		}
 		else
 			swidth = 3;
 
 		if(getParameter("ledsize") !=  null)
 		{
-			ledsize = new Integer(new String(getParameter("ledsize"))).intValue();
+			ledsize = Integer.parseInt(getParameter("ledsize"));
 
 			// A little error trapping
 			if(ledsize < 1)
@@ -123,7 +123,7 @@ public class LED extends java.applet.Applet implements Runnable
 
 		if(getParameter("ht") != null)
 		{
-			HEIGHT = ledsize*(new Integer(new String(getParameter("ht")))).intValue();
+			HEIGHT = ledsize* Integer.parseInt(getParameter("ht"));
 			h = HEIGHT/ledsize;
 		}
 		else
@@ -135,7 +135,7 @@ public class LED extends java.applet.Applet implements Runnable
 
 		if(getParameter("wth") != null)
 		{
-			WIDTH = ledsize*(new Integer(new String(getParameter("wth")))).intValue();
+			WIDTH = ledsize* Integer.parseInt(getParameter("wth"));
 			if(WIDTH/ledsize%2 == 1)
 				WIDTH += ledsize;  // It must be even!!!
 
@@ -150,7 +150,7 @@ public class LED extends java.applet.Applet implements Runnable
 
 		if(getParameter("border") != null)
 		{
-			border = new Integer(new String(getParameter("border"))).intValue();
+			border = Integer.parseInt(getParameter("border"));
 		}
 		else
 			border = 0;
@@ -158,17 +158,17 @@ public class LED extends java.applet.Applet implements Runnable
 		if(getParameter("bordercolor") != null)
 		{
 			// User specified border color!!
-			s = new String(getParameter("bordercolor"));
+			s = getParameter("bordercolor");
 			s = s.trim();
-			r = new Integer(s.substring(0,s.indexOf(","))).intValue();
+			r = Integer.parseInt(s.substring(0, s.indexOf(",")));
 			s = s.substring(s.indexOf(",")+1);
-			g = new Integer(s.substring(0,s.indexOf(","))).intValue();
+			g = Integer.parseInt(s.substring(0, s.indexOf(",")));
 			s = s.substring(s.indexOf(",")+1);
-			b = new Integer(s).intValue();
+			b = Integer.parseInt(s);
 
 			bhilite = new Color(r+40<256?r+40:255, g+40<256?g+40:255, b+40<256?b+40:255);
 			bcolor = new Color(r,g,b);
-			bshadow = new Color(r-40>=0?r-40:0, g-40>=0?g-40:0, b-40>=0?b-40:0);
+			bshadow = new Color(Math.max(r - 40, 0), Math.max(g - 40, 0), Math.max(b - 40, 0));
 		}
 		else
 		{
@@ -179,17 +179,17 @@ public class LED extends java.applet.Applet implements Runnable
 
 		if(getParameter("hot_bordercolor") != null)
 		{
-			s = new String(getParameter("hot_bordercolor"));
+			s = getParameter("hot_bordercolor");
 			s = s.trim();
-			r = new Integer(s.substring(0,s.indexOf(","))).intValue();
+			r = Integer.parseInt(s.substring(0, s.indexOf(",")));
 			s = s.substring(s.indexOf(",")+1);
-			g = new Integer(s.substring(0,s.indexOf(","))).intValue();
+			g = Integer.parseInt(s.substring(0, s.indexOf(",")));
 			s = s.substring(s.indexOf(",")+1);
-			b = new Integer(s).intValue();
+			b = Integer.parseInt(s);
 
 			h_bhilite = new Color(r+40<256?r+40:255, g+40<256?g+40:255, b+40<256?b+40:255);
 			h_bcolor = new Color(r,g,b);
-			h_bshadow = new Color(r-40>=0?r-40:0, g-40>=0?g-40:0, b-40>=0?b-40:0);
+			h_bshadow = new Color(Math.max(r - 40, 0), Math.max(g - 40, 0), Math.max(b - 40, 0));
 		}
 		else
 		{
@@ -200,13 +200,9 @@ public class LED extends java.applet.Applet implements Runnable
 
 		if(getParameter("smooth_leds") != null)
 		{
-			s = new String(getParameter("smooth_leds"));
+			s = getParameter("smooth_leds");
 			s = s.trim();
-			if(s.equals("true")) {
-				smooth_leds = true;
-			} else {
-				smooth_leds = false;
-			}
+            smooth_leds = s.equals("true");
 		}
 		else
 		{
@@ -237,7 +233,7 @@ public class LED extends java.applet.Applet implements Runnable
 		try {
 			getAttrs();
 		} catch(RuntimeException e) {
-			currurl = new String("LED Sign Error: " + e.getMessage());
+			currurl = "LED Sign Error: " + e.getMessage();
 			System.out.println(currurl);
 			stop();
 		}
@@ -322,7 +318,7 @@ public class LED extends java.applet.Applet implements Runnable
 				try {
 					runInit();
 				} catch(RuntimeException e) {
-					currurl = new String("LED Sign Error: " + e.getMessage());
+					currurl = "LED Sign Error: " + e.getMessage();
 					System.out.println(currurl);
 					showStatus(currurl);
 					// request cooperative shutdown
@@ -406,7 +402,7 @@ public class LED extends java.applet.Applet implements Runnable
 	{
 		if (currURL != null)
 		{
-			if(target.length() > 0)  {
+			if(!target.isEmpty())  {
 				getAppletContext().showDocument(currURL,target);
 			} else {
 				getAppletContext().showDocument(currURL);
@@ -471,7 +467,7 @@ public class LED extends java.applet.Applet implements Runnable
 		{
 			currurl = appletName;
 			currURL = null;
-			target = new String("");
+			target = "";
 		}
 
 		if(inapplet)
@@ -481,25 +477,24 @@ public class LED extends java.applet.Applet implements Runnable
 
 		switch(fi.func)
 		{
-			case 0:
-				place = 0;
+			case APPEAR:
+            case OVER_RIGHT:
+            case SCROLL_CENTER:
+            case OVER_CENTER:
+            case OVER_DOWN:
+            case SLEEP:
+            case SCROLL_LEFT:
+            case SCROLL_UP:
+                place = 0;
 				break;
-			case 1:
-				place = 0;
-				break;
-			case 2:
-				place = 0;
-				break;
-			case 3:
+            case SCROLL_RIGHT:
 				place = msg.length()-1;
 				break;
-			case 4:
-				place = 0;
+            case SCROLL_DOWN:
+            case OVER_UP:
+                place = h-1;
 				break;
-			case 5:
-				place = h-1;
-				break;
-			case 6:
+			case PIXEL:
 				place = 0;
 
 				pix = new Pixelize[w*h];
@@ -522,26 +517,14 @@ public class LED extends java.applet.Applet implements Runnable
 					pix[rand] = temp;
 				}
 				break;
-			case 7:
+			case BLINK:
 				place = fi.times*2;
 				break;
-			case 8:
-				place = 0;
-				break;
-			case 9:
-				place = 0;
-				break;
-			case 10:
-				place = 0;
-				break;
-			case 11:
+            case OVER_LEFT:
 				place = w;
 				break;
-			case 12:
-				place = h-1;
-				break;
-			case 13:
-				place = 0;
+            default:
+				// DO, REPEAT, RELOAD, CHAIN handled in Script.nextFunc()
 				break;
 		}
 	}
@@ -728,7 +711,7 @@ public class LED extends java.applet.Applet implements Runnable
 
 			switch(fi.func)
 			{
-				case 0:
+				case APPEAR:
 					if(fi.text == null)
 					{
 						gr.drawImage(offimg,offset,offset, this);
@@ -746,12 +729,12 @@ public class LED extends java.applet.Applet implements Runnable
 
 					break;
 
-				case 1:
+				case SLEEP:
 					done = true;
 
 					break;
 
-				case 2:
+				case SCROLL_LEFT:
 					pixmap.copyArea(ledsize,0,WIDTH-ledsize,HEIGHT,-ledsize,0);
 
 					for(i=0;i<HEIGHT;i+=ledsize)
@@ -766,7 +749,7 @@ public class LED extends java.applet.Applet implements Runnable
 
 					break;
 
-				case 3:
+				case SCROLL_RIGHT:
 					pixmap.copyArea(0,0,WIDTH-ledsize,HEIGHT,ledsize,0);
 
 					for(i=0;i<HEIGHT;i+=ledsize)
@@ -781,7 +764,7 @@ public class LED extends java.applet.Applet implements Runnable
 
 					break;
 
-				case 4:
+				case SCROLL_UP:
 					pixmap.copyArea(0,ledsize,WIDTH,HEIGHT-ledsize,0,-ledsize);
 
 					for(i=0;i<WIDTH;i+=ledsize)
@@ -799,7 +782,7 @@ public class LED extends java.applet.Applet implements Runnable
 
 					break;
 
-				case 5:
+				case SCROLL_DOWN:
 					pixmap.copyArea(0,0,WIDTH,HEIGHT-ledsize,0,ledsize);
 
 					for(i=0;i<WIDTH;i+=ledsize)
@@ -821,7 +804,7 @@ public class LED extends java.applet.Applet implements Runnable
 
 					break;
 
-				case 6:
+				case PIXEL:
 					i = place + fi.times;
 					while(place < WIDTH/ledsize*h && place < i)
 					{
@@ -843,7 +826,7 @@ public class LED extends java.applet.Applet implements Runnable
 
 					break;
 
-				case 7:
+				case BLINK:
 					if(place%2 == 0)
 						gr.drawImage(offimg,offset,offset, this);
 					else
@@ -856,7 +839,7 @@ public class LED extends java.applet.Applet implements Runnable
 
 					break;
 
-				case 8:
+				case OVER_RIGHT:
 					if(msg.inRange(place))
 						for(i=0;i<h;i++)
 							drawLED(place*ledsize,i*ledsize,msg.getLED(place,i),msg.getColor(place),pixmap);
@@ -873,7 +856,7 @@ public class LED extends java.applet.Applet implements Runnable
 
 					break;
 
-				case 9:
+				case SCROLL_CENTER:
 					if(w >= place*2)
 					{
 						pixmap.copyArea(WIDTH/2,0,WIDTH/2-ledsize,HEIGHT,ledsize,0);
@@ -903,7 +886,7 @@ public class LED extends java.applet.Applet implements Runnable
 
 					break;
 
-				case 10:
+				case OVER_CENTER:
 					if(w >= place+w/2)
 					{
 						for(i=0;i<h;i++)
@@ -931,7 +914,7 @@ public class LED extends java.applet.Applet implements Runnable
 
 					break;
 
-				case 11:
+				case OVER_LEFT:
 					if(msg.inRange(place))
 						for(i=0;i<h;i++)
 							drawLED(place*ledsize,i*ledsize,msg.getLED(place,i),msg.getColor(place),pixmap);
@@ -948,7 +931,7 @@ public class LED extends java.applet.Applet implements Runnable
 
 					break;
 
-				case 12:
+				case OVER_UP:
 					for(i=0;i<w;i++)
 					{
 						if(msg.inRange(i))
@@ -966,7 +949,7 @@ public class LED extends java.applet.Applet implements Runnable
 
 					break;
 
-				case 13:
+				case OVER_DOWN:
 					for(i=0;i<w;i++)
 					{
 						if(msg.inRange(i))
@@ -983,10 +966,12 @@ public class LED extends java.applet.Applet implements Runnable
 						done = true;
 
 					break;
+
+				default:
+					// DO, REPEAT, RELOAD, CHAIN not rendered here
+					break;
 			}
 		}
 
-		return;
-
-	}
+    }
 }

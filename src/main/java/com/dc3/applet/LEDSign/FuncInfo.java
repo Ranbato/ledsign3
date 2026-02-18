@@ -8,14 +8,12 @@
 
 package com.dc3.applet.LEDSign;
 
-import java.awt.*;
-import java.io.*;
-import java.util.*;
+
 import java.net.*;
 
 public class FuncInfo
 {
-	public int func;
+	public LEDFunction func;
 	public int delay;
 	public int startspace, endspace;
 	public int times, remaining;

@@ -17,7 +17,11 @@ repositories {
 }
 
 dependencies {
-    // No external dependencies expected; add here if needed.
+    // Test dependencies
+    testImplementation("org.junit.jupiter:junit-jupiter:5.9.3")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.3")
+    // Ensure JUnit Platform launcher is available at runtime
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.9.3")
 }
 
 application {
@@ -36,3 +40,6 @@ tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
 }
 
+tasks.test {
+    useJUnitPlatform()
+}
