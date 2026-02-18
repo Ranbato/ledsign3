@@ -1,14 +1,14 @@
 plugins {
-    id 'java'
-    id 'application'
+    java
+    application
 }
 
-group = 'com.dc3'
-version = '1.0.0'
+group = "com.dc3"
+version = "1.0.0"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(11)
+        languageVersion.set(JavaLanguageVersion.of(11))
     }
 }
 
@@ -22,16 +22,17 @@ dependencies {
 
 application {
     // Use the desktop launcher MainLauncher
-    mainClass = 'com.dc3.applet.LEDSign.MainLauncher'
+    mainClass.set("com.dc3.applet.LEDSign.MainLauncher")
 }
 
-jar {
+tasks.jar {
     manifest {
-        attributes('Main-Class': application.mainClass)
+        attributes["Main-Class"] = application.mainClass.get()
     }
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType<JavaCompile> {
     // Use UTF-8 encoding (standard for modern Java projects)
-    options.encoding = 'UTF-8'
+    options.encoding = "UTF-8"
 }
+
