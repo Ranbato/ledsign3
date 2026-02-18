@@ -1,0 +1,11 @@
+Do
+   !! Move "Hello" up onto the sign
+   ScrollUp delay=30 center=true text=Hello
+   Sleep delay=1000
+
+   !! Scroll "This is a test" left onto the sign
+   ScrollLeft center=true delay=30 text=This is a test
+   Sleep delay=1000
+
+!! Repeat infinitely
+Repeat times=-1

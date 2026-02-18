@@ -82,6 +82,18 @@ google-services.json
 # Android Profiling
 *.hprof
 
+### Project-specific ignores
+# Ignore legacy/unmoved original sources under top-level com/ (we now use src/main/java)
+/com/
+
+# Ignore build outputs in original layout
+out/
+
+# Keep the Gradle wrapper scripts and properties checked in
+!gradlew
+!gradlew.bat
+!gradle/wrapper/**
+
 ### Kotlin template
 # Compiled class file
 *.class
@@ -107,4 +119,3 @@ google-services.json
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
-

@@ -1,0 +1,46 @@
+# LEDSign3 Configuration Properties
+#
+# Copy this file to ledsign.properties in the working directory
+# and customize parameters. Command-line arguments override these settings.
+#
+# Example:
+#   ./gradlew run
+#   (reads this file if present)
+#
+# Or override specific parameters:
+#   ./gradlew run --args="script=custom.led ledsize=3"
+
+# Required: Script file to run (relative to resources or current directory)
+script=example.led
+
+# Required: Font file to use
+font=default.font
+
+# LED display size in pixels: 1=smallest, 4=largest
+# User value (1-4) is incremented internally; you control visual size
+ledsize=2
+
+# Display width in character columns
+wth=200
+
+# Display height in character rows (should match font height)
+ht=9
+
+# Border width in pixels (0 for no border)
+border=2
+
+# Border color as R,G,B values (0-255)
+# Uncomment to customize; default is light gray
+# bordercolor=200,200,200
+
+# Border color for clickable links (default is blue)
+# Uncomment to customize
+# hot_bordercolor=0,0,255
+
+# Smooth/circular LEDs for larger sizes (true/false)
+# true = draw smooth circles, false = draw crossed/plus shapes
+smooth_leds=true
+
+# Width of space character in columns
+spacewidth=3
+
