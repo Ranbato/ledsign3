@@ -10,6 +10,7 @@ package com.dc3.applet.LEDSign;
 
 
 import java.net.*;
+import java.util.*;
 
 public class FuncInfo
 {
@@ -24,5 +25,7 @@ public class FuncInfo
 	public String target;
 	public String script;
 	public URL url;
-	public linkList ret;
+	public int retIndex;  // Index in script list for DO/REPEAT loop returns
 }
+
+

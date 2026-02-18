@@ -20,6 +20,7 @@ import java.io.*;
 import java.util.*;
 import java.net.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 //=============================================================================
 // Function		  Code
@@ -46,8 +47,8 @@ import java.time.LocalDateTime;
 
 public class Script
 {
-	private linkList list;
-	linkList ptr,start;
+	private LinkedList<FuncInfo> scriptList;
+	private int currentIndex;  // Current position in the script
 	String scrpt;
 	URL documentURL;
 	boolean finished = false;
@@ -118,7 +119,7 @@ public class Script
 		fi.url = null;
 		fi.target = "";
 		fi.script = null;
-		fi.ret = null;
+		fi.retIndex = -1;  // No return point by default
 
 		s = s.trim();
 
@@ -224,12 +225,13 @@ public class Script
 	{
 		FuncInfo fi;
 
-		fi = ptr.fi;
-		if(fi == null)
+		if(currentIndex >= scriptList.size())
 		{
-			return(null);
+			return null;
 		}
-		ptr = ptr.next;
+
+		fi = scriptList.get(currentIndex);
+		currentIndex++;
 
 		switch(fi.func)
 		{
@@ -247,13 +249,13 @@ public class Script
 					}
 					else
 					{
-						ptr = fi.ret;
+						currentIndex = fi.retIndex;
 						fi = nextFunc();
 					}
 				}
 				else
 				{
-					ptr = fi.ret;
+					currentIndex = fi.retIndex;
 					fi = nextFunc();
 				}
 				break;
@@ -487,9 +489,8 @@ public class Script
 
 		try
 		{
-			list = new linkList();
-			start = list;
-			ptr = list;
+			scriptList = new LinkedList<FuncInfo>();
+			currentIndex = 0;
 			listlen = 0;
 			dos = 0;
 			while((line = dis.readLine()) != null)
@@ -498,42 +499,38 @@ public class Script
 				if(!(line.startsWith("!!")) && (!line.isEmpty()))
 				{
 					listlen++;
-					ptr.fi = getFunc(line);
-					if(ptr.fi.func == LEDFunction.DO)
+					FuncInfo fi = getFunc(line);
+					scriptList.add(fi);
+					if(fi.func == LEDFunction.DO)
 						dos++;
-					ptr.next = new linkList();
-					ptr = ptr.next;
 				}
 			}
 
-			ptr = start;
-			linkList stack[] = new linkList[dos];
+			// Build mapping of DO/REPEAT loops using indices
+			List<Integer> doStack = new ArrayList<Integer>();
 			dos = 0;
-			for(a=0;a<listlen;a++)
+			for(int idx = 0; idx < scriptList.size(); idx++)
 			{
-				if(ptr.fi.func == LEDFunction.DO)
+				FuncInfo fi = scriptList.get(idx);
+				if(fi.func == LEDFunction.DO)
 				{
-					stack[dos] = new linkList();
-					stack[dos] = ptr;
+					doStack.add(idx);
 					dos++;
 				}
-				else if(ptr.fi.func == LEDFunction.REPEAT)
+				else if(fi.func == LEDFunction.REPEAT)
 				{
 					if(dos > 0)
 					{
 						dos--;
-						ptr.fi.ret = stack[dos];
+						fi.retIndex = doStack.get(dos);
 					}
 					else
 					{
-						System.out.println("Repeat error in line : Repeat times="+ptr.fi.times);
+						System.out.println("Repeat error in line : Repeat times="+fi.times);
 						System.out.println(" 	 Mismatched Do/Repeats?");
 					}
 				}
-				ptr = ptr.next;
 			}
-
-			ptr = start;
 
 			dis.close();
 		}
