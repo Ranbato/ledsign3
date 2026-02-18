@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Properties;
@@ -37,39 +38,113 @@ public class MainLauncher {
             JFrame frame = new JFrame("LEDSign");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-            LED applet = new LED();
+            LED ledPanel = new LED();
 
-            // Prepare stub and default parameters (from example.html)
-            AppletStubImpl stub = new AppletStubImpl(applet);
-
-            // Default values if not provided
-            stub.setParameter("ledsize", finalProps.getProperty("ledsize", "2"));
-            stub.setParameter("script", finalProps.getProperty("script", "example.led"));
-            stub.setParameter("border", finalProps.getProperty("border", "2"));
-            stub.setParameter("font", finalProps.getProperty("font", "default.font"));
-            stub.setParameter("wth", finalProps.getProperty("wth", "200"));
-            stub.setParameter("ht", finalProps.getProperty("ht", "9"));
-
-            // Apply any additional properties to the stub
-            for (String name : finalProps.stringPropertyNames()) {
-                stub.setParameter(name, finalProps.getProperty(name));
+            // Set configuration from properties using public setters
+            try {
+                // Determine document base (for resource loading)
+                URL documentBase = Paths.get(System.getProperty("user.dir"),
+                    "src", "main", "resources", "com", "dc3", "applet", "LEDSign").toUri().toURL();
+                ledPanel.setDocumentBase(documentBase);
+            } catch (Exception e) {
+                try {
+                    // Fallback to classpath resources
+                    URL res = LED.class.getResource("/com/dc3/applet/LEDSign/");
+                    if (res != null) {
+                        ledPanel.setDocumentBase(res);
+                    }
+                } catch (Exception ex) {
+                    System.err.println("Failed to determine document base: " + ex.getMessage());
+                }
             }
 
-            applet.setStub(stub);
+            // Set required parameters
+            ledPanel.setScript(finalProps.getProperty("script", "example.led"));
+            ledPanel.setFont(finalProps.getProperty("font", "default.font"));
 
-            frame.getContentPane().add(applet, BorderLayout.CENTER);
+            // Set optional parameters with defaults
+            int ledSize = Integer.parseInt(finalProps.getProperty("ledsize", "2"));
+            ledPanel.setLedSize(ledSize);
 
-            // Call lifecycle
-            try { applet.init(); } catch (Throwable t) { t.printStackTrace(); }
-            try { applet.start(); } catch (Throwable t) { t.printStackTrace(); }
+            int border = Integer.parseInt(finalProps.getProperty("border", "2"));
+            ledPanel.setBorder(border);
 
+            int width = Integer.parseInt(finalProps.getProperty("wth", "200"));
+            int height = Integer.parseInt(finalProps.getProperty("ht", "9"));
+            ledPanel.setWidthHeight(width, height);
+
+            int spaceWidth = Integer.parseInt(finalProps.getProperty("spacewidth", "3"));
+            ledPanel.setSpaceWidth(spaceWidth);
+
+            // Set border colors if provided
+            String borderColor = finalProps.getProperty("bordercolor");
+            if (borderColor != null && !borderColor.isEmpty()) {
+                try {
+                    String[] parts = borderColor.split(",");
+                    if (parts.length == 3) {
+                        int r = Integer.parseInt(parts[0].trim());
+                        int g = Integer.parseInt(parts[1].trim());
+                        int b = Integer.parseInt(parts[2].trim());
+                        ledPanel.setBorderColors(r, g, b);
+                    }
+                } catch (Exception e) {
+                    System.out.println("Warning: Invalid bordercolor format: " + borderColor);
+                }
+            }
+
+            // Set hot border colors if provided
+            String hotBorderColor = finalProps.getProperty("hot_bordercolor");
+            if (hotBorderColor != null && !hotBorderColor.isEmpty()) {
+                try {
+                    String[] parts = hotBorderColor.split(",");
+                    if (parts.length == 3) {
+                        int r = Integer.parseInt(parts[0].trim());
+                        int g = Integer.parseInt(parts[1].trim());
+                        int b = Integer.parseInt(parts[2].trim());
+                        ledPanel.setHotBorderColors(r, g, b);
+                    }
+                } catch (Exception e) {
+                    System.out.println("Warning: Invalid hot_bordercolor format: " + hotBorderColor);
+                }
+            }
+
+            // Set smooth LEDs if provided
+            String smoothLeds = finalProps.getProperty("smooth_leds", "true");
+            ledPanel.setSmoothLeds(smoothLeds.equalsIgnoreCase("true"));
+
+            // Add to frame
+            frame.getContentPane().add(ledPanel, BorderLayout.CENTER);
+
+            // Call lifecycle methods
+            try {
+                ledPanel.init();
+            } catch (Throwable t) {
+                System.err.println("Error during init: ");
+                t.printStackTrace();
+                System.exit(1);
+            }
+            try {
+                ledPanel.start();
+            } catch (Throwable t) {
+                System.err.println("Error during start: ");
+                t.printStackTrace();
+                System.exit(1);
+            }
+
+            // Set frame properties and display
+            ledPanel.setPreferredSize(new Dimension(
+                Integer.parseInt(finalProps.getProperty("wth", "200")) * (Integer.parseInt(finalProps.getProperty("ledsize", "2")) + 1) + 2 * 3 * Integer.parseInt(finalProps.getProperty("border", "2")),
+                Integer.parseInt(finalProps.getProperty("ht", "9")) * (Integer.parseInt(finalProps.getProperty("ledsize", "2")) + 1) + 2 * 3 * Integer.parseInt(finalProps.getProperty("border", "2"))
+            ));
             frame.pack();
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);
 
+            // Add shutdown hook to cleanly stop the LED thread
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                try { applet.stop(); } catch (Throwable ignored) {}
-                try { applet.destroy(); } catch (Throwable ignored) {}
+                try {
+                    ledPanel.stop();
+                } catch (Throwable ignored) {}
             }));
         });
     }
