@@ -7,5 +7,18 @@ Do
    ScrollLeft center=true delay=30 text=This is a test
    Sleep delay=1000
 
+!! All letters, numbers and symbols
+   !! Scroll "ABCDEFGHIJKLMNOPQRSTUVWXYZ" left onto the sign
+   ScrollLeft center=true delay=30 text=ABCDEFGHIJKLMNOPQRSTUVWXYZ
+   Sleep delay=1000
+
+   !! Scroll "abcdefghijklmnopqrstuvwxyz" left onto the sign
+   ScrollLeft center=true delay=30 text=abcdefghijklmnopqrstuvwxyz
+   Sleep delay=1000
+
+   !! Scroll "0123456789!@#$%^&*()_+-=[]{}|;':\",./<>?" left onto the sign
+   ScrollLeft center=true delay=30 text=0123456789!@#$%^&*()_+-=[]{}|;':",./<>?
+   Sleep delay=1000
+
 !! Repeat infinitely
 Repeat times=-1

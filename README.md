@@ -1,4 +1,5 @@
 # LEDSign3 - Gradle Java Application
+Vibe coding practice project!
 
 A modernized Gradle build of the classic LEDSign3 applet project, converted from a legacy Java applet to a standalone desktop application.
 
