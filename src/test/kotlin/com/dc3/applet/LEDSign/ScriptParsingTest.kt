@@ -9,12 +9,14 @@ class ScriptParsingTest {
     @Throws(Exception::class)
     fun parseSimpleScript_shouldReturnAppearFunc() {
         // Copy resource test.led to a temp directory so Script can open it via URL
-        this.javaClass.getResourceAsStream("/com/dc3/applet/LEDSign/test.led").use { `in` ->
+        this.javaClass.getResourceAsStream("/scripts/test.led").use { `in` ->
             Assertions.assertNotNull(`in`, "Test script resource not found")
             val tmpDir = Files.createTempDirectory("ledsign-test")
             tmpDir.toFile().deleteOnExit()
             val tmpFile = tmpDir.resolve("test.led")
-            Files.copy(`in`, tmpFile)
+            if (`in` != null) {
+                Files.copy(`in`, tmpFile)
+            }
             tmpFile.toFile().deleteOnExit()
 
             val dirUrl = tmpDir.toUri().toURL()
@@ -24,7 +26,7 @@ class ScriptParsingTest {
             val fi = script.nextFunc()
             Assertions.assertNotNull(fi)
             Assertions.assertEquals(LEDFunction.APPEAR, fi!!.func)
-            Assertions.assertEquals("Hello", fi.text!!.trim { it <= ' ' })
+            Assertions.assertEquals("Hello", fi.text!!.trim ())
         }
     }
 }

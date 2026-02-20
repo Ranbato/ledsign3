@@ -46,13 +46,13 @@ object MainLauncher {
                 // Determine document base (for resource loading)
                 val documentBase = Paths.get(
                     System.getProperty("user.dir"),
-                    "src", "main", "resources", "com", "dc3", "applet", "LEDSign"
+                    "src", "main", "resources"
                 ).toUri().toURL()
                 ledPanel.setDocumentBase(documentBase)
             } catch (e: Exception) {
                 try {
                     // Fallback to classpath resources
-                    val res = LED::class.java.getResource("/com/dc3/applet/LEDSign/")
+                    val res = LED::class.java.getResource("/")
                     if (res != null) {
                         ledPanel.setDocumentBase(res)
                     }
@@ -62,7 +62,7 @@ object MainLauncher {
             }
 
             // Set required parameters
-            ledPanel.setScript(finalProps.getProperty("script", "example.led"))
+            ledPanel.setScript(finalProps.getProperty("script", "demo2.led"))
             ledPanel.setFont(finalProps.getProperty("font", "default.font"))
 
             // Set optional parameters with defaults
@@ -86,9 +86,9 @@ object MainLauncher {
                     val parts: Array<String?> =
                         borderColor.split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
                     if (parts.size == 3) {
-                        val r = parts[0]!!.trim { it <= ' ' }.toInt()
-                        val g = parts[1]!!.trim { it <= ' ' }.toInt()
-                        val b = parts[2]!!.trim { it <= ' ' }.toInt()
+                        val r = parts[0]!!.trim ().toInt()
+                        val g = parts[1]!!.trim ().toInt()
+                        val b = parts[2]!!.trim ().toInt()
                         ledPanel.setBorderColors(r, g, b)
                     }
                 } catch (e: Exception) {
@@ -103,9 +103,9 @@ object MainLauncher {
                     val parts: Array<String?> =
                         hotBorderColor.split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
                     if (parts.size == 3) {
-                        val r = parts[0]!!.trim { it <= ' ' }.toInt()
-                        val g = parts[1]!!.trim { it <= ' ' }.toInt()
-                        val b = parts[2]!!.trim { it <= ' ' }.toInt()
+                        val r = parts[0]!!.trim ().toInt()
+                        val g = parts[1]!!.trim ().toInt()
+                        val b = parts[2]!!.trim ().toInt()
                         ledPanel.setHotBorderColors(r, g, b)
                     }
                 } catch (e: Exception) {

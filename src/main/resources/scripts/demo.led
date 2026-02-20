@@ -1,0 +1,32 @@
+Do
+   !! --- RED: SCROLL UP ---
+   !! Default starts as Red (\r)
+   ScrollUp delay=30 center=true text=\rRED: This is ScrollUp
+   Sleep delay=1500
+
+   !! --- ORANGE & YELLOW: SCROLL LEFT ---
+   !! Demonstrates mid-line color switching
+   ScrollLeft delay=20 center=true text=\oORANGE and \yYELLOW Scroll
+   Sleep delay=1500
+
+   !! --- GREEN: SCROLL DOWN ---
+   ScrollDown delay=30 center=true text=\gGREEN: Falling Down
+   Sleep delay=1500
+
+   !! --- CYAN & BLUE: SCROLL RIGHT ---
+   ScrollRight delay=25 center=true text=\cCYAN meets \bBLUE
+   Sleep delay=1500
+
+   !! --- PURPLE & WHITE: TYPEWRITER ---
+   Pixel delay=100 center=true text=\pPURPLE and \wWHITE Type
+   Sleep delay=2000
+
+   !! --- RAINBOW SPECTRUM: WIPE LEFT ---
+   !! Demonstrates all codes in a single string
+   OverLeft delay=40 center=true text=\rR\oO\yY\gG\cC\bB\pP\wW
+   Sleep delay=2000
+
+   !! --- CLEAR AND RESTART ---
+   Clear
+   Sleep delay=1000
+Loop

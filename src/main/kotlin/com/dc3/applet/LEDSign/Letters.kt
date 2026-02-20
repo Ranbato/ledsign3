@@ -8,8 +8,9 @@
 //------------------------------------------------------------------------------
 package com.dc3.applet.LEDSign
 
-import java.io.DataInputStream
+import java.io.BufferedReader
 import java.io.IOException
+import java.io.InputStreamReader
 import java.net.URL
 import java.net.URLConnection
 
@@ -18,25 +19,19 @@ import java.net.URLConnection
 class Letters
     (url: URL?, URLfile: String, width: Int) {
     var HEIGHT: Int = 0
-    var TOTAL: Int = 0
-    var let: String? = null
     var path: String? = null
-    var url: URL? = null
     var urlc: URLConnection? = null
-    var dis: DataInputStream? = null
+    var dis: BufferedReader? = null
     var w: Int = 0
     var h: Int = 0
     var num: Int = 0
-    var place: Int = 0
-    var len: Int = 0
-    var space: Int = 0
     var swidth: Int = 0
     var index: Array<Index?>? = null
 
     init {
         try {
             urlc = (URL(url, URLfile)).openConnection()
-            dis = DataInputStream(urlc!!.getInputStream())
+            dis = BufferedReader(InputStreamReader(urlc!!.getInputStream()))
             path = URLfile
             swidth = width
         } catch (e: IOException) {
@@ -99,7 +94,7 @@ class Letters
 
         index = arrayOfNulls<Index>(num + 1)
 
-        var i: Int = 0
+        var i = 0
         while (i < num) {
             ch = 2
             width = 10

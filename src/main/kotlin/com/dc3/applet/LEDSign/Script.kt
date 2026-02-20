@@ -15,8 +15,9 @@
 package com.dc3.applet.LEDSign
 
 import com.dc3.applet.LEDSign.LEDFunction.Companion.fromScriptName
-import java.io.DataInputStream
+import java.io.BufferedReader
 import java.io.IOException
+import java.io.InputStreamReader
 import java.net.MalformedURLException
 import java.net.URL
 import java.net.URLConnection
@@ -49,36 +50,35 @@ class Script
     (var documentURL: URL?, var scrpt: String?) {
     private var scriptList: LinkedList<FuncInfo>? = null
     private var currentIndex = 0 // Current position in the script
-    var finished: Boolean = false
 
     init {
         initScript()
     }
 
-    private fun getParam(s: String, sub: String): String? {
-        var i: Int
+    private fun getParam(command: String, subCommand: String): String? {
+        var subCommandPos: Int
         val j: Int
         var tmp: String?
 
-        i = s.indexOf(sub)
-        j = s.indexOf("text")
+        subCommandPos = command.indexOf(subCommand)
+        j = command.indexOf("text")
 
-        if (j == -1 || i <= j) {
-            if (i == -1) return null
+        if (j == -1 || subCommandPos <= j) {
+            if (subCommandPos == -1) return null
             else {
-                tmp = s.substring(i)
-                i = tmp.indexOf("=")
-                if (i == -1) {
-                    println("Error in '" + sub + "' parameter in " + s)
+                tmp = command.substring(subCommandPos)
+                subCommandPos = tmp.indexOf("=")
+                if (subCommandPos == -1) {
+                    println("Error in '" + subCommand + "' parameter in " + command)
                     return null
                 } else {
-                    i++
-                    if (sub.compareTo("text") == 0) tmp = tmp.substring(i)
+                    subCommandPos++
+                    if (subCommand.compareTo("text") == 0) tmp = tmp.substring(subCommandPos)
                     else {
-                        tmp = tmp.substring(i)
+                        tmp = tmp.substring(subCommandPos)
                         if (tmp.contains(" ")) tmp = tmp.substring(0, tmp.indexOf(" "))
                     }
-                    tmp.trim { it <= ' ' }
+                    tmp.trim ()
                     return tmp
                 }
             }
@@ -103,7 +103,7 @@ class Script
         fi.script = null
         fi.retIndex = -1 // No return point by default
 
-        s = s.trim { it <= ' ' }
+        s = s.trim ()
 
         var tmp2: String?
         tmp2 = getParam(s, "delay")
@@ -313,12 +313,12 @@ class Script
                     {
                         // LocalDateTime.getDayOfWeek returns MONDAY..SUNDAY
                         val dow = date.dayOfWeek.value % 7 // maps Sunday->0, Monday->1
-                        if (t.compareTo("dd") == 0) ddmmyy = day!![dow]
-                        else ddmmyy = Day!![dow]
+                        if (t.compareTo("dd") == 0) ddmmyy = day[dow]
+                        else ddmmyy = Day[dow]
 
                         i = 0
                         while (i < ddmmyy!!.length) {
-                            fi.color = (fi.color) + (c).toString()
+                            fi.color += (c).toString()
                             i++
                         }
 
@@ -338,12 +338,12 @@ class Script
                     } else if (t.compareTo("mm") == 0 || t.compareTo("MM") == 0) {
                         var monthIndex = date.monthValue - 1 // 0-based index
                         if (monthIndex < 0 || monthIndex > 11) monthIndex = 0
-                        if (t.compareTo("mm") == 0) ddmmyy = month!![monthIndex]
-                        else ddmmyy = Month!![monthIndex]
+                        if (t.compareTo("mm") == 0) ddmmyy = month[monthIndex]
+                        else ddmmyy = Month[monthIndex]
 
                         i = 0
                         while (i < ddmmyy!!.length) {
-                            fi.color = (fi.color) + (c).toString()
+                            fi.color += (c).toString()
                             i++
                         }
 
@@ -354,7 +354,7 @@ class Script
 
                         i = 0
                         while (i < ddmmyy.length) {
-                            fi.color = (fi.color) + (c).toString()
+                            fi.color += (c).toString()
                             i++
                         }
 
@@ -394,7 +394,7 @@ class Script
     @Throws(RuntimeException::class)
     private fun initScript() {
         val urlc: URLConnection
-        val dis: DataInputStream?
+        val dis: BufferedReader?
         val url: URL?
         var line: String?
         var listlen: Int
@@ -403,7 +403,7 @@ class Script
         try {
             url = URL(documentURL, scrpt)
             urlc = url.openConnection()
-            dis = DataInputStream(urlc.getInputStream())
+            dis = BufferedReader(InputStreamReader(urlc.getInputStream()))
         } catch (e: Exception) {
             throw (RuntimeException("Failed to connect to host for script"))
         }
@@ -414,7 +414,7 @@ class Script
             listlen = 0
             dos = 0
             while ((dis.readLine().also { line = it }) != null) {
-                line = line!!.trim { it <= ' ' }
+                line = line!!.trim ()
                 if (!(line.startsWith("!!")) && (!line.isEmpty())) {
                     listlen++
                     val fi = getFunc(line)

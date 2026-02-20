@@ -1,0 +1,246 @@
+
+<!-- saved from url=(0046)https://www.javapro.de/applets/led/script.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Simple Script</title>
+
+<body >
+<h1>The LED Script</h1>
+
+<h3>Syntax</h3>
+The script syntax for LED Sign V2.7 is 100% backward compatible with
+previous version of LED Sign.  If your script ran on V2.5 it will run
+on V2.7.  However, a V2.7 script may not run on V2.5.
+<br>
+<br>
+The syntax for the LED script is extremely simple.
+Each command must be on one line; they cannot be split onto multiple
+lines. Only one command can be on a line.  A line that starts
+with a "!!" is a comment.  Here is an example of a script:
+<pre>!! Just a simple script
+Do
+   !! Move "Hello" up onto the sign
+   ScrollUp delay=30 center=true text=Hello
+   Sleep delay=1000
+
+   !! Scroll "This is a test" left onto the sign
+   ScrollLeft delay=30 startspace=20 endspace=80 text=This is a test
+   Sleep delay=300
+
+!! Repeat infinitely
+Repeat times=-1
+</pre>
+
+<p>
+You can write a script with the same text editor that you use to
+write your HTML.  Programs like Windows Notepad or Macintosh
+teachtext will work fine.
+
+</p><h3>The Options</h3>
+The different options for each function/transition are as follows:
+<ul>
+   <li>clear=true
+   </li><li>delay=&lt;non-neg int&gt;
+   </li><li>startspace=&lt;non-neg int&gt;
+   </li><li>endspace=&lt;non-neg int&gt;
+   </li><li>center=true
+   </li><li>times=&lt;-1 | non-neg int&gt;  (-1 specifies infinity)
+   </li><li>pixels=&lt;pos int&gt;
+   </li><li>URL=&lt;URL string&gt;
+   </li><li>text=&lt;string&gt;
+</li></ul>
+   
+<h3>The Functions/Transitions</h3>
+The different functions/transitions available in
+LED Sign are as follows:
+<ul>
+   <li>Appear - Cause text to appear on the sign
+   </li><li>Sleep - A delay
+   </li><li>ScrollUp - Scroll whatever is on the sign and the new message
+       on going from bottom to top.
+   </li><li>ScrollDown - Scroll whatever is on the sign and the new message
+       on going from top to bottom.
+   </li><li>ScrollLeft - Scroll whatever is on the sign and the new message
+       on going from right to left.
+   </li><li>ScrollRight - Scroll whatever is on the sign and the new
+       message on going from left to right.
+   </li><li>ScrollCenter - Scroll whatever is on the sign and the new
+       message originating from the center.
+   </li><li>OverUp - same as ScrollUp except it overwrites whatever is
+       on the sign.
+   </li><li>OverDown - same as ScrollDown except it overwrites whatever is
+       on the sign.
+   </li><li>OverLeft - same as ScrollLeft except it overwrites whatever is
+       on the sign.
+   </li><li>OverRight - same as ScrollRight except it overwrites whatever is
+       on the sign. 
+   </li><li>OverCenter - same as ScrollCenter except it overwrites whatever is
+       on the sign.
+   </li><li>Pixel - Pixel in a new message
+   </li><li>Blink - Cause what ever is on the sign to blink
+   </li><li>Do - begin a "Repeat" block
+   </li><li>Repeat - end a "Repeat" block
+   </li><li>Reload - reload the script.  Probably the most powerful feature
+       of LED Sign.  Whenever LED Sign gets the Reload command, it will
+       reload the script over the URL.  Useful if information is updated
+       frequently (like stock quotes).  An example use of reload:
+<pre>      Do
+            [Display some messages/information]
+      
+      !! display those messages 5 times
+      Repeat times=5
+      !! Now reload the script to get any possible changes
+      Reload
+</pre>
+</li></ul>
+
+<h3>Usage</h3>
+<ul>
+   <li>Appear [clear=true] [spacing] [URL=&lt;URL string&gt;] [text=&lt;String&gt;] 
+   </li><li>Sleep [URL=&lt;URL string&gt;] [delay=&lt;non-neg int&gt;]  (defaults to 1000)
+   </li><li>ScrollUp [clear=true] [URL=&lt;URL string&gt;] [delay=&lt;non-neg int&gt;] [spacing]
+       [text=&lt;String&gt;]
+   </li><li>ScrollDown [clear=true] [URL=&lt;URL string&gt;] [delay=&lt;non-neg int&gt;] [spacing]
+       [text=&lt;String&gt;]
+   </li><li>ScrollLeft [clear=true] [URL=&lt;URL string&gt;] [delay=&lt;non-neg int&gt;] [spacing]
+       [text=&lt;String&gt;]
+   </li><li>ScrollRight [clear=true] [URL=&lt;URL string&gt;] [delay=&lt;non-neg int&gt;] [spacing]
+       [text=&lt;String&gt;]
+   </li><li>ScrollCenter [clear=true] [URL=&lt;URL string&gt;] [delay=&lt;non-neg int&gt;] [spacing]
+       [text=&lt;String&gt;]
+   </li><li>OverUp [clear=true] [URL=&lt;URL string&gt;] [delay=&lt;non-neg int&gt;] [spacing]
+       [text=&lt;String&gt;]   
+   </li><li>OverDown [clear=true] [URL=&lt;URL string&gt;] [delay=&lt;non-neg int&gt;] [spacing]
+       [text=&lt;String&gt;]   
+   </li><li>OverLeft [clear=true] [URL=&lt;URL string&gt;] [delay=&lt;non-neg int&gt;] [spacing]
+       [text=&lt;String&gt;]
+   </li><li>OverRight [clear=true] [URL=&lt;URL string&gt;] [delay=&lt;non-neg int&gt;] [spacing]
+       [text=&lt;String&gt;]
+   </li><li>OverCenter [clear=true] [URL=&lt;URL string&gt;] [delay=&lt;non-neg int&gt;] [spacing]
+       [text=&lt;String&gt;]
+   </li><li>Pixel [clear=true] [URL=&lt;URL string&gt;] [delay=&lt;non-neg int&gt;] [pixels=&lt;pos int&gt;]
+       [spacing] [text=&lt;String&gt;]
+   </li><li>Blink [delay=&lt;non-neg int&gt;] [URL=&lt;URL string&gt;] [times=&lt;pos int&gt;]
+   </li><li>Do (no parameters)
+   </li><li>Repeat times=&lt;-1 | non-neg int&gt; (the "times" parameter is required)
+   </li><li>Reload (no parameters)                                                    
+</li></ul>
+[spacing] = [center=true] | [startspace=&lt;non-neg int&gt;]
+[endspace=&lt;non-neg int&gt;]
+<p></p>
+
+<h3>Text Color</h3>
+<p>
+In LED Sign you can make the "on" LEDs eight different colors:
+</p><ul>
+   <li>Red (default)
+   </li><li>Orange
+   </li><li>Yellow
+   </li><li>Green
+   </li><li>Cyan
+   </li><li>Blue
+   </li><li>Purple
+   </li><li>White
+</li></ul>
+
+The way you specify a color is with a '\' followed by 'r', 'o', 'y',
+'g', 'c', 'b', 'p', or 'w'.  Everything after a color specification
+will be that color until another color is specified or the end of the
+line is reached.  Each line starts out with the default of red.  The
+text specified as:
+<pre>  text=This \ois \ya \gtest
+</pre>
+will appear on the sign as "This is a test" but with "Test" being red,
+"is" being orange, "a" being yellow and "test" being green.
+<p></p>
+
+<h3>Variable tags!!!</h3>
+<p>
+LED Sign also has the capability of displaying the current time/date. The
+tags are specified in the text just like the colors.  Here are the
+time/date tags:
+
+</p><ul>
+   <li> tt - time
+   </li><li> dd - day abbreviated (eg Fri)
+   </li><li> DD - day (eg Friday)
+   </li><li> dn - day number 1-31
+   </li><li> mm - month abbreviated (eg Aug)
+   </li><li> MM - month (eg August)
+   </li><li> mn - month number 1-12
+   </li><li> yy - last two digits of the year (eg 95)
+   </li><li> YY - the year (eg 1995)
+</li></ul>
+
+The way the time/date tags are used is by preceding them by a backslash
+('\') and enclosing them in brackets ({}).  Here is an exaple:
+<pre>     ScrollLeft text=The current time is \{tt}.  Today is \{dd} \{mm} \{dn}, \{YY}.
+</pre>
+
+The line above in a script would print somthing like "The current time is
+6:19 pm.  Today is Sun Oct 29, 1995." on the sign.
+<p></p>
+<p>
+</p>
+
+<h3>URL connections!</h3>
+You can specify a URL to go to if the user clicks on LED Sign while it
+is displaying a certain message.  To do this all you need to do is
+specify the URL on the function line in the script. Here's an example:
+<pre>     ScrollLeft URL=http://java.sun.com text=Java is cool!
+     ScrollLeft URL=http://java.sun.com endspace=40 text=Click on this sign now to go to Sun!
+</pre>
+
+The URL tag is also valid for the "Sleep" function.  So you can be
+displaying a message and sleeping, and they can still click on the
+sign and have it take them to the URL.  Example:
+
+<pre>     Appear center=true URL=http://www.sun.com text=Sun MicroSystems
+     Sleep URL=http://www.sun.com delay=4000
+     !! Wait a long time to give them a chance to click!
+</pre>
+
+<h3>Notes</h3>
+<p>
+The "text" parameter <b>must</b> be the last parameter, because the
+string after the "text=" is your message.  This makes it easy to parse
+(ie no nested quote problem) and easy for the user.  What you see is
+what you get!!!  
+</p>
+
+<p>
+If the "clear=true" parameter is given to one of the transitions, it will
+cause the sign to clear (turn off LEDs) in the manner of the
+transition.  i.e. "ScrollDown clear=true" would clear the sign by
+scrolling whatever is on the sign down off the sign.
+</p>
+
+<p>
+If the "center=true" option is set, then the message will be centered
+on the sign <b>if</b> it fits on the sign.  It doesn't make sense to
+center a message if it is longer than the sign.  So, if your message
+isn't centering, then it is probably too long.  The "startspace" and
+"endspace" parameters are ignored when the "center=true" parameter is
+given.
+</p>
+
+<p>
+The script is much like HTML in how it handles function tags and
+parameters.  It will ignore anything it does not recognize.  However,
+there are some ways to stop the applet.  For example, "delay=fifty" is
+incorrect because "delay" requires an integer and would thus cause
+the applet to stop. There is some script error output.  If you are
+having trouble with LED Sign running your script, check your java
+console (under options menu in netscape);  any error output is printed
+there.
+</p>
+
+<hr>
+
+<p></p>
+<address>
+The LED Sign Java applet is written and Copyright 1995 by
+<a href="http://www.cs.hope.edu/~dbrown/">Darrick Brown</a>
+</address>
+
+
+</body></html>

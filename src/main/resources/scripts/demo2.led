@@ -1,0 +1,69 @@
+!! LEDSign3 Comprehensive Demo Script
+Do
+   !! --- COLORS AND VARIABLES ---
+   !! Demonstrates all 8 colors and time/date tags
+   Appear center=true text=\rRed \oOrange \yYellow \gGreen \cCyan \bBlue \pPurple \wWhite
+   Sleep delay=2000
+
+   ScrollLeft center=true text=\wCurrent Time: \{tt} - \{DD}, \{MM} \{dn}, \{YY}
+   Sleep delay=2000
+
+   !! --- SCROLLING FUNCTIONS ---
+   !! ScrollUp with clear=true (clears the previous message by scrolling it up)
+   ScrollUp clear=true delay=30 center=true text=\gScrolling Up (Green)
+   Sleep delay=1500
+
+   !! ScrollDown
+   ScrollDown delay=30 center=true text=\yScrolling Down (Yellow)
+   Sleep delay=1500
+
+   !! ScrollLeft with spacing instead of centering
+   ScrollLeft delay=20 startspace=10 endspace=50 text=\oScroll Left with Spacing
+   Sleep delay=1500
+
+   !! ScrollRight
+   ScrollRight delay=25 center=true text=\cScrolling Right (Cyan)
+   Sleep delay=1500
+
+   !! ScrollCenter (Originates from the middle)
+   ScrollCenter delay=40 center=true text=\pScroll Center (Purple)
+   Sleep delay=1500
+
+   !! --- OVERWRITE FUNCTIONS ---
+   !! These overwrite the current display rather than pushing it
+   OverUp delay=30 center=true text=\rOverUp (Red)
+   Sleep delay=1000
+
+   OverDown delay=30 center=true text=\wOverDown (White)
+   Sleep delay=1000
+
+   OverLeft delay=30 center=true text=\bOverLeft (Blue)
+   Sleep delay=1000
+
+   OverRight delay=30 center=true text=\gOverRight (Green)
+   Sleep delay=1000
+
+   OverCenter delay=30 center=true text=\yOverCenter (Yellow)
+   Sleep delay=1000
+
+   !! --- SPECIAL EFFECTS ---
+   !! Pixel transition (using the pixels parameter)
+   Pixel delay=10 pixels=50 center=true text=\cPixel Transition
+   Sleep delay=2000
+
+   !! Blink (flashes whatever is currently on the sign)
+   Blink delay=200 times=5
+   Sleep delay=1000
+
+   !! --- URL INTERACTION ---
+   !! Displays a message that acts as a hyperlink
+   Appear center=true URL=https://www.google.com text=\wClick to Visit Google
+   Sleep URL=https://www.google.com delay=3000
+
+   !! --- FINAL RESET ---
+   !! ScrollLeft with clear=true to empty the sign
+   ScrollLeft clear=true delay=20 text=Restarting Demo...
+   Sleep delay=1000
+
+!! Repeat the block infinitely
+Repeat times=-1

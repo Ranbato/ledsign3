@@ -64,7 +64,6 @@ class LED : JPanel(), Runnable {
     // Configuration for Swing-based application
     private var documentBase: URL? = null // Base URL for resources
     var scrpt: String? = null
-    var endspace: String? = null
     var fnt: String? = null // Script and font parameters
     var text: String? = null // the current message
     var currurl: String? = appletName // The current url that are set in the script
@@ -223,13 +222,13 @@ class LED : JPanel(), Runnable {
         val r2: Rectangle?
 
         pix = arrayOfNulls<Pixelize>(1)
-        let = Letters(documentBase, fnt!!, swidth)
+        let = Letters(URL(documentBase , "fonts/"), fnt!!, swidth)
         if (HEIGHT != let!!.height() * ledsize) {
             println("LED Sign Warning: parameter \"ht\" should be set to " + let!!.height() + ".")
         }
 
         msg = LEDMessage(h, w, let!!)
-        scr = Script(documentBase, scrpt)
+        scr = Script(URL(documentBase,"scripts/") , scrpt)
         fi = FuncInfo()
         nextFunc()
 
