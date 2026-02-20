@@ -12,15 +12,16 @@
 //
 //	V3.0: ...
 //------------------------------------------------------------------------------
+package com.dc3.applet.LEDSign
 
-package com.dc3.applet.LEDSign;
-
-import java.awt.*;
-import java.io.*;
-import java.util.*;
-import java.net.*;
-import java.time.LocalDateTime;
-import java.util.List;
+import com.dc3.applet.LEDSign.LEDFunction.Companion.fromScriptName
+import java.io.DataInputStream
+import java.io.IOException
+import java.net.MalformedURLException
+import java.net.URL
+import java.net.URLConnection
+import java.time.LocalDateTime
+import java.util.*
 
 //=============================================================================
 // Function		  Code
@@ -44,499 +45,406 @@ import java.util.List;
 // Reload				99
 // Chain 				100
 //=============================================================================
+class Script
+    (var documentURL: URL?, var scrpt: String?) {
+    private var scriptList: LinkedList<FuncInfo>? = null
+    private var currentIndex = 0 // Current position in the script
+    var finished: Boolean = false
 
-public class Script
-{
-	private LinkedList<FuncInfo> scriptList;
-	private int currentIndex;  // Current position in the script
-	String scrpt;
-	URL documentURL;
-	boolean finished = false;
+    init {
+        initScript()
+    }
 
-	public Script(URL url, String s) throws RuntimeException
-	{
-		scrpt = s;
-		documentURL = url;
-		initScript();
-	}
+    private fun getParam(s: String, sub: String): String? {
+        var i: Int
+        val j: Int
+        var tmp: String?
 
-	private String getParam(String s, String sub)
-	{
-		int i,j;
-		String tmp;
+        i = s.indexOf(sub)
+        j = s.indexOf("text")
 
-		i = s.indexOf(sub);
-		j = s.indexOf("text");
+        if (j == -1 || i <= j) {
+            if (i == -1) return null
+            else {
+                tmp = s.substring(i)
+                i = tmp.indexOf("=")
+                if (i == -1) {
+                    println("Error in '" + sub + "' parameter in " + s)
+                    return null
+                } else {
+                    i++
+                    if (sub.compareTo("text") == 0) tmp = tmp.substring(i)
+                    else {
+                        tmp = tmp.substring(i)
+                        if (tmp.contains(" ")) tmp = tmp.substring(0, tmp.indexOf(" "))
+                    }
+                    tmp.trim { it <= ' ' }
+                    return tmp
+                }
+            }
+        } else return null
+    }
 
-		if(j == -1 || i <= j)
-		{
-			if(i == -1)
-				return null;
-			else
-			{
-				tmp = s.substring(i);
-				i = tmp.indexOf("=");
-				if(i == -1)
-				{
-					System.out.println("Error in '"+sub+"' parameter in "+s);
-					return null;
-				}
-				else
-				{
-					i++;
-					if(sub.compareTo("text") == 0)
-						tmp = tmp.substring(i);
-					else
-					{
-						tmp = tmp.substring(i);
-						if(tmp.contains(" "))
-							tmp = tmp.substring(0,tmp.indexOf(" "));
-					}
-					tmp.trim();
-					return tmp;
-				}
-			}
-		}
-		else
-			return null;
+    private fun getFunc(s: String): FuncInfo {
+        var s = s
+        val fi = FuncInfo()
 
-	}
+        fi.func = null
+        fi.delay = 40
+        fi.startspace = 10
+        fi.endspace = 20
+        fi.times = -1
+        fi.remaining = 0
+        fi.centered = false
+        fi.color = ""
+        fi.text = "No text specified"
+        fi.url = null
+        fi.target = ""
+        fi.script = null
+        fi.retIndex = -1 // No return point by default
 
-	private FuncInfo getFunc(String s)
-	{
-		String tmp;
-		FuncInfo fi = new FuncInfo();
+        s = s.trim { it <= ' ' }
 
-		fi.func = null;
-		fi.delay = 40;
-		fi.startspace = 10;
-		fi.endspace = 20;
-		fi.times = -1;
-		fi.remaining = 0;
-		fi.centered = false;
-		fi.color = "";
-		fi.text = "No text specified";
-		fi.url = null;
-		fi.target = "";
-		fi.script = null;
-		fi.retIndex = -1;  // No return point by default
+        var tmp2: String?
+        tmp2 = getParam(s, "delay")
+        if (tmp2 != null) fi.delay = tmp2.toInt()
 
-		s = s.trim();
+        tmp2 = getParam(s, "clear")
+        if (tmp2 != null && tmp2.compareTo("true") == 0) {
+            fi.centered = true
+            fi.text = ""
+        } else {
+            tmp2 = getParam(s, "center")
+            if (tmp2 != null && tmp2.compareTo("true") == 0) fi.centered = true
+            else {
+                fi.centered = false
+                tmp2 = getParam(s, "startspace")
+                if (tmp2 != null) fi.startspace = tmp2.toInt()
 
-		String tmp2;
-		tmp2 = getParam(s,"delay");
-		if(tmp2 != null)
-			fi.delay = Integer.parseInt(tmp2);
+                tmp2 = getParam(s, "endspace")
+                if (tmp2 != null) fi.endspace = tmp2.toInt()
+            }
 
-		tmp2 = getParam(s,"clear");
-		if(tmp2 != null && tmp2.compareTo("true") == 0)
-		{
-			fi.centered = true;
-			fi.text = "";
-		}
-		else
-		{
-			tmp2 = getParam(s,"center");
-			if(tmp2 != null && tmp2.compareTo("true") == 0)
-				fi.centered = true;
-			else
-			{
-				fi.centered = false;
-				tmp2 = getParam(s,"startspace");
-				if(tmp2 != null)
-					fi.startspace = Integer.parseInt(tmp2);
+            tmp2 = getParam(s, "text")
+            if (tmp2 != null) fi.text = tmp2
+        }
 
-				tmp2 = getParam(s,"endspace");
-				if(tmp2 != null)
-					fi.endspace = Integer.parseInt(tmp2);
-			}
+        tmp2 = getParam(s, "times")
+        if (tmp2 != null) {
+            fi.times = tmp2.toInt()
+            fi.remaining = fi.times
+        }
 
-			tmp2 = getParam(s,"text");
-			if(tmp2 != null)
-				fi.text = tmp2;
-		}
+        tmp2 = getParam(s, "pixels")
+        if (tmp2 != null) {
+            fi.times = tmp2.toInt()
+            fi.remaining = fi.times
+        }
 
-		tmp2 = getParam(s,"times");
-		if(tmp2 != null)
-		{
-			fi.times = Integer.parseInt(tmp2);
-			fi.remaining = fi.times;
-		}
+        tmp2 = getParam(s, "URL")
+        if (tmp2 != null) {
+            if (tmp2.indexOf(',') != -1) {
+                fi.target = tmp2.substring(tmp2.indexOf(',') + 1)
+                tmp2 = tmp2.substring(0, tmp2.indexOf(','))
+            }
 
-		tmp2 = getParam(s,"pixels");
-		if(tmp2 != null)
-		{
-			fi.times = Integer.parseInt(tmp2);
-			fi.remaining = fi.times;
-		}
+            try {
+                fi.url = URL(tmp2)
+            } catch (e: MalformedURLException) {
+                println("Bad URL: " + tmp2)
+                fi.url = null
+            }
+        }
 
-		tmp2 = getParam(s,"URL");
-		if(tmp2 != null)
-		{
-			if(tmp2.indexOf(',') != -1)
-			{
-				fi.target = tmp2.substring(tmp2.indexOf(',') + 1);
-				tmp2 = tmp2.substring(0,tmp2.indexOf(','));
-			}
+        fi.script = getParam(s, "script")
 
-			try
-			{
-				fi.url = new URL(tmp2);
-			}
-			catch(MalformedURLException e)
-			{
-				System.out.println("Bad URL: "+tmp2);
-				fi.url = null;
-			}
-		}
+        val i = s.indexOf(" ")
+        val funcName: String?
+        if (i != -1) funcName = s.substring(0, i)
+        else funcName = s
 
-		fi.script = getParam(s,"script");
+        // Parse function name using enum
+        fi.func = fromScriptName(funcName)
 
-		int i = s.indexOf(" ");
-		String funcName;
-		if(i != -1)
-			funcName = s.substring(0,i);
-		else
-			funcName = s;
+        // Apply function-specific defaults
+        if (fi.func == LEDFunction.PIXEL) {
+            if (fi.delay < 1) fi.delay = 1
+            if (fi.times < 1) fi.times = 15
+        } else if (fi.func == LEDFunction.BLINK) {
+            if (fi.times < 1) fi.times = 2
+        }
 
-		// Parse function name using enum
-		fi.func = LEDFunction.fromScriptName(funcName);
+        fi.store = fi.text
 
-		// Apply function-specific defaults
-		if(fi.func == LEDFunction.PIXEL)
-		{
-			if(fi.delay < 1)
-				fi.delay = 1;
-			if(fi.times < 1)
-				fi.times = 15;
-		}
-		else if(fi.func == LEDFunction.BLINK)
-		{
-			if(fi.times < 1)
-				fi.times = 2;
-		}
+        return fi
+    }
 
-		fi.store = fi.text;
+    fun nextFunc(): FuncInfo? {
+        var fi: FuncInfo?
 
-		return fi;
-	}
+        if (currentIndex >= scriptList!!.size) {
+            return null
+        }
 
-	public FuncInfo nextFunc()
-	{
-		FuncInfo fi;
+        fi = scriptList!!.get(currentIndex)
+        currentIndex++
 
-		if(currentIndex >= scriptList.size())
-		{
-			return null;
-		}
+        when (fi.func) {
+            LEDFunction.DO -> fi = nextFunc()
+            LEDFunction.REPEAT -> if (fi.times >= 0) {
+                fi.remaining--
+                if (fi.remaining <= 0) {
+                    fi.remaining = fi.times
+                    fi = nextFunc()
+                } else {
+                    currentIndex = fi.retIndex
+                    fi = nextFunc()
+                }
+            } else {
+                currentIndex = fi.retIndex
+                fi = nextFunc()
+            }
 
-		fi = scriptList.get(currentIndex);
-		currentIndex++;
+            LEDFunction.CHAIN -> {
+                scrpt = fi.script
+                initScript()
+                fi = nextFunc()
+            }
 
-		switch(fi.func)
-		{
-			case DO:
-				fi = nextFunc();
-				break;
-			case REPEAT:
-				if(fi.times >= 0)
-				{
-					fi.remaining--;
-					if(fi.remaining <= 0)
-					{
-						fi.remaining = fi.times;
-						fi = nextFunc();
-					}
-					else
-					{
-						currentIndex = fi.retIndex;
-						fi = nextFunc();
-					}
-				}
-				else
-				{
-					currentIndex = fi.retIndex;
-					fi = nextFunc();
-				}
-				break;
-			case CHAIN:
-				scrpt = fi.script;
-				// fall through to RELOAD
-			case RELOAD:
-				initScript();
-				fi = nextFunc();
-				break;
-			default:
-				// Other functions are handled elsewhere
-				break;
-		}
+            LEDFunction.RELOAD -> {
+                initScript()
+                fi = nextFunc()
+            }
 
-		return fi;
-	}
+            else -> {}
+        }
 
-	private boolean isColor(char t)
-	{
-		return(t == 'r' || t == 'g' || t == 'b' || t == 'y' || t == 'o' ||
-				t == 'p' || t == 'w' || t == 'c');
-	}
+        return fi
+    }
 
-	public FuncInfo parseLine(FuncInfo fi)
-	{
-		String tmp;
-		String time;
-		String month[] = {"Jan","Feb","Mar","Apr","May","Jun",
-								"Jul","Aug","Sept","Oct","Nov","Dec"};
-		String Month[] = {"January","February","March","April","May","June",
-								"July","August","September","October","November","December"};
-		String day[] = {"Sun","Mon","Tues","Wed","Thur","Fri","Sat"};
-		String Day[] = {"Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"};
-		String ddmmyy;
-		int min;
-		int pm;
-		// Use modern java.time.LocalDateTime
-		LocalDateTime date = LocalDateTime.now();
-		int a,b;
-		int i;
-		char c;
-		String t;
+    private fun isColor(t: Char): Boolean {
+        return (t == 'r' || t == 'g' || t == 'b' || t == 'y' || t == 'o' || t == 'p' || t == 'w' || t == 'c')
+    }
 
-		tmp = fi.store;
-		fi.color = "";
+    fun parseLine(fi: FuncInfo): FuncInfo {
+        var tmp: String?
+        var time: String?
+        val month: Array<String?> = arrayOf<String?>(
+            "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+            "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"
+        )
+        val Month: Array<String?> = arrayOf<String?>(
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        )
+        val day: Array<String?> = arrayOf<String?>("Sun", "Mon", "Tues", "Wed", "Thur", "Fri", "Sat")
+        val Day: Array<String?> =
+            arrayOf<String?>("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")
+        var ddmmyy: String?
+        var min: Int
+        var pm: Int
+        // Use modern java.time.LocalDateTime
+        val date = LocalDateTime.now()
+        var a: Int
+        var b: Int
+        var i: Int
+        var c: Char
+        var t: String?
 
-		if(fi.func == LEDFunction.APPEAR || (fi.func != null && fi.func.getCode() >= 2 && fi.func.getCode() <= 97))
-		{
-			c = 'r';
-			b = 0;
-			while(b < tmp.length())
-			{
-				if(tmp.charAt(b) == '\\')
-				{
-					b++;
-					if(tmp.charAt(b) == '{')
-					{
-						t = tmp.substring(b+1);
-						tmp = tmp.substring(0,b-1).concat(t.substring(t.indexOf('}')+1));
-						t = t.substring(0,t.indexOf('}'));
-						b -= 1;
-					}
-					else
-					{
-						t = tmp.substring(b,b+1);
-						tmp = (tmp.substring(0,b-1)).concat(tmp.substring(b+1));
-						b -= 1;
-					}
+        tmp = fi.store
+        fi.color = ""
 
-					if(t.length() == 1 && isColor(t.charAt(0)))
-					{
-						c = t.charAt(0);
-					}
-					else if(t.compareTo("tt") == 0)
-					{
-						if(date.getHour() >= 12)
-							pm = 1;
-						else
-							pm = 0;
+        if (fi.func == LEDFunction.APPEAR || (fi.func != null && fi.func!!.code >= 2 && fi.func!!.code <= 97)) {
+            c = 'r'
+            b = 0
+            while (b < tmp!!.length) {
+                if (tmp.get(b) == '\\') {
+                    b++
+                    if (tmp.get(b) == '{') {
+                        t = tmp.substring(b + 1)
+                        tmp = tmp.substring(0, b - 1) + t.substring(t.indexOf('}') + 1)
+                        t = t.substring(0, t.indexOf('}'))
+                        b -= 1
+                    } else {
+                        t = tmp.substring(b, b + 1)
+                        tmp = (tmp.substring(0, b - 1)) + tmp.substring(b + 1)
+                        b -= 1
+                    }
 
-						if(pm == 1)
-						{
-							a = date.getHour();
-							if(a == 12)
-								time	= String.valueOf(12);
-							else
-								time = String.valueOf(date.getHour()-12);
-						}
-						else
-						{
-							a = date.getHour();
-							if(a == 0)
-								time = String.valueOf(12);
-							else
-								time = String.valueOf(a);
-						}
+                    if (t.length == 1 && isColor(t.get(0))) {
+                        c = t.get(0)
+                    } else if (t.compareTo("tt") == 0) {
+                        if (date.hour >= 12) pm = 1
+                        else pm = 0
 
-						time = time.concat(":");
+                        if (pm == 1) {
+                            a = date.hour
+                            if (a == 12) time = 12.toString()
+                            else time = (date.hour - 12).toString()
+                        } else {
+                            a = date.hour
+                            if (a == 0) time = 12.toString()
+                            else time = a.toString()
+                        }
 
-						min = date.getMinute();
-						if(min >= 10)
-							time = time.concat(String.valueOf(min));
-						else
-						{
-							time = time.concat("0");
-							time = time.concat(String.valueOf(min));
-						}
+                        time = time + ":"
 
-						if(pm == 1)
-							time = time.concat(" pm");
-						else
-							time = time.concat(" am");
+                        min = date.minute
+                        if (min >= 10) time = time + min.toString()
+                        else {
+                            time = time + "0"
+                            time = time + min.toString()
+                        }
 
-						tmp = ((tmp.substring(0,b)).concat(time)).concat(tmp.substring(b));
+                        if (pm == 1) time = time + " pm"
+                        else time = time + " am"
 
-						b += time.length();
+                        tmp = ((tmp.substring(0, b)) + time) + tmp.substring(b)
 
-						for(i = 0; i < time.length(); i++)
-							fi.color = (fi.color).concat((new Character(c)).toString());
+                        b += time.length
 
-					} // End time
-					else if(t.compareTo("dd") == 0 || t.compareTo("DD") == 0)    // day name
-					{
-						// LocalDateTime.getDayOfWeek returns MONDAY..SUNDAY
-						int dow = date.getDayOfWeek().getValue() % 7; // maps Sunday->0, Monday->1
-						if(t.compareTo("dd") == 0)
-							ddmmyy = day[dow];
-						else
-							ddmmyy = Day[dow];
+                        i = 0
+                        while (i < time.length) {
+                            fi.color = (fi.color) + (c).toString()
+                            i++
+                        }
+                    } // End time
+                    else if (t.compareTo("dd") == 0 || t.compareTo("DD") == 0)  // day name
+                    {
+                        // LocalDateTime.getDayOfWeek returns MONDAY..SUNDAY
+                        val dow = date.dayOfWeek.value % 7 // maps Sunday->0, Monday->1
+                        if (t.compareTo("dd") == 0) ddmmyy = day!![dow]
+                        else ddmmyy = Day!![dow]
 
-						for(i = 0; i < ddmmyy.length(); i++)
-							fi.color = (fi.color).concat((new Character(c)).toString());
+                        i = 0
+                        while (i < ddmmyy!!.length) {
+                            fi.color = (fi.color) + (c).toString()
+                            i++
+                        }
 
-						tmp = ((tmp.substring(0,b)).concat(ddmmyy)).concat(tmp.substring(b));
-						b += ddmmyy.length();
-					}
-					else if(t.compareTo("dn") == 0)
-					{
-						ddmmyy = String.valueOf(date.getDayOfMonth());
+                        tmp = ((tmp.substring(0, b)) + ddmmyy) + tmp.substring(b)
+                        b += ddmmyy.length
+                    } else if (t.compareTo("dn") == 0) {
+                        ddmmyy = date.dayOfMonth.toString()
 
-						for(i = 0; i < ddmmyy.length(); i++)
-							fi.color = (fi.color).concat((new Character(c)).toString());
+                        i = 0
+                        while (i < ddmmyy.length) {
+                            fi.color = (fi.color) + (c).toString()
+                            i++
+                        }
 
-						tmp = ((tmp.substring(0,b)).concat(ddmmyy)).concat(tmp.substring(b));
-						b += ddmmyy.length();
-					}
-					else if(t.compareTo("mm") == 0 || t.compareTo("MM") == 0)
-					{
-						int monthIndex = date.getMonthValue() - 1; // 0-based index
-						if(monthIndex < 0 || monthIndex > 11) monthIndex = 0;
-						if(t.compareTo("mm") == 0)
-							ddmmyy = month[monthIndex];
-						else
-							ddmmyy = Month[monthIndex];
+                        tmp = ((tmp.substring(0, b)) + ddmmyy) + tmp.substring(b)
+                        b += ddmmyy.length
+                    } else if (t.compareTo("mm") == 0 || t.compareTo("MM") == 0) {
+                        var monthIndex = date.monthValue - 1 // 0-based index
+                        if (monthIndex < 0 || monthIndex > 11) monthIndex = 0
+                        if (t.compareTo("mm") == 0) ddmmyy = month!![monthIndex]
+                        else ddmmyy = Month!![monthIndex]
 
-						for(i = 0; i < ddmmyy.length(); i++)
-							fi.color = (fi.color).concat((new Character(c)).toString());
+                        i = 0
+                        while (i < ddmmyy!!.length) {
+                            fi.color = (fi.color) + (c).toString()
+                            i++
+                        }
 
-						tmp = ((tmp.substring(0,b)).concat(ddmmyy)).concat(tmp.substring(b));
-						b += ddmmyy.length();
-					}
-					else if(t.compareTo("mn") == 0)
-					{
-						ddmmyy = String.valueOf(date.getMonthValue());
+                        tmp = ((tmp.substring(0, b)) + ddmmyy) + tmp.substring(b)
+                        b += ddmmyy.length
+                    } else if (t.compareTo("mn") == 0) {
+                        ddmmyy = date.monthValue.toString()
 
-						for(i = 0; i < ddmmyy.length(); i++)
-							fi.color = (fi.color).concat((new Character(c)).toString());
+                        i = 0
+                        while (i < ddmmyy.length) {
+                            fi.color = (fi.color) + (c).toString()
+                            i++
+                        }
 
-						tmp = ((tmp.substring(0,b)).concat(ddmmyy)).concat(tmp.substring(b));
-						b += ddmmyy.length();
-					}
-					else if(t.compareTo("yy") == 0 || t.compareTo("YY") == 0)
-					{
-						if(t.compareTo("YY") == 0)
-							ddmmyy = String.valueOf(date.getYear());
-						else
-							ddmmyy = String.valueOf(date.getYear()%100);
+                        tmp = ((tmp.substring(0, b)) + ddmmyy) + tmp.substring(b)
+                        b += ddmmyy.length
+                    } else if (t.compareTo("yy") == 0 || t.compareTo("YY") == 0) {
+                        if (t.compareTo("YY") == 0) ddmmyy = date.year.toString()
+                        else ddmmyy = (date.year % 100).toString()
 
-						for(i = 0; i < ddmmyy.length(); i++)
-							fi.color = (fi.color).concat((new Character(c)).toString());
+                        i = 0
+                        while (i < ddmmyy.length) {
+                            fi.color = (fi.color) + (c).toString()
+                            i++
+                        }
 
-						tmp = ((tmp.substring(0,b)).concat(ddmmyy)).concat(tmp.substring(b));
-						b += ddmmyy.length();
+                        tmp = ((tmp.substring(0, b)) + ddmmyy) + tmp.substring(b)
+                        b += ddmmyy.length
+                    } else if (t.compareTo("\\") == 0) {
+                        tmp = (tmp.substring(0, b)) + tmp.substring(b + 1)
+                        b--
+                    } else {
+                        println("Backslash (\\) error in text line: " + fi.store)
+                    }
+                } else {
+                    b++
+                    fi.color = fi.color + (c).toString()
+                }
+            } // END - while(...)
+        } // END - if(fi.func == ...)
 
-					}
-					else if(t.compareTo("\\") == 0)
-					{
-						tmp = (tmp.substring(0,b)).concat(tmp.substring(b+1));
-						b--;
-					}
-					else
-					{
-						System.out.println("Backslash (\\) error in text line: "+ fi.store);
-					}
 
-				}
-				else
-				{
-					b++;
-					fi.color = fi.color.concat((new Character(c)).toString());
-				}
+        fi.text = tmp
 
-			}    // END - while(...)
+        return fi
+    }
 
-		} // END - if(fi.func == ...)
+    @Throws(RuntimeException::class)
+    private fun initScript() {
+        val urlc: URLConnection
+        val dis: DataInputStream?
+        val url: URL?
+        var line: String?
+        var listlen: Int
+        var dos: Int
 
-		fi.text = tmp;
+        try {
+            url = URL(documentURL, scrpt)
+            urlc = url.openConnection()
+            dis = DataInputStream(urlc.getInputStream())
+        } catch (e: Exception) {
+            throw (RuntimeException("Failed to connect to host for script"))
+        }
 
-		return fi;
+        try {
+            scriptList = LinkedList<FuncInfo>()
+            currentIndex = 0
+            listlen = 0
+            dos = 0
+            while ((dis.readLine().also { line = it }) != null) {
+                line = line!!.trim { it <= ' ' }
+                if (!(line.startsWith("!!")) && (!line.isEmpty())) {
+                    listlen++
+                    val fi = getFunc(line)
+                    scriptList!!.add(fi)
+                    if (fi.func == LEDFunction.DO) dos++
+                }
+            }
 
-	}
+            // Build mapping of DO/REPEAT loops using indices
+            val doStack: MutableList<Int?> = ArrayList<Int?>()
+            dos = 0
+            for (idx in scriptList!!.indices) {
+                val fi = scriptList!!.get(idx)
+                if (fi.func == LEDFunction.DO) {
+                    doStack.add(idx)
+                    dos++
+                } else if (fi.func == LEDFunction.REPEAT) {
+                    if (dos > 0) {
+                        dos--
+                        fi.retIndex = doStack.get(dos)!!
+                    } else {
+                        println("Repeat error in line : Repeat times=" + fi.times)
+                        println(" 	 Mismatched Do/Repeats?")
+                    }
+                }
+            }
 
-	private void initScript() throws RuntimeException
-	{
-		URLConnection urlc;
-		DataInputStream dis;
-		URL url;
-		String line;
-		int listlen;
-		int dos;
-		int a;
-
-		try {
-			url = new URL(documentURL,scrpt);
-			urlc = url.openConnection();
-			dis = new DataInputStream(urlc.getInputStream());
-		} catch(Exception e) {
-			throw(new RuntimeException("Failed to connect to host for script"));
-		}
-
-		try
-		{
-			scriptList = new LinkedList<FuncInfo>();
-			currentIndex = 0;
-			listlen = 0;
-			dos = 0;
-			while((line = dis.readLine()) != null)
-			{
-				line = line.trim();
-				if(!(line.startsWith("!!")) && (!line.isEmpty()))
-				{
-					listlen++;
-					FuncInfo fi = getFunc(line);
-					scriptList.add(fi);
-					if(fi.func == LEDFunction.DO)
-						dos++;
-				}
-			}
-
-			// Build mapping of DO/REPEAT loops using indices
-			List<Integer> doStack = new ArrayList<Integer>();
-			dos = 0;
-			for(int idx = 0; idx < scriptList.size(); idx++)
-			{
-				FuncInfo fi = scriptList.get(idx);
-				if(fi.func == LEDFunction.DO)
-				{
-					doStack.add(idx);
-					dos++;
-				}
-				else if(fi.func == LEDFunction.REPEAT)
-				{
-					if(dos > 0)
-					{
-						dos--;
-						fi.retIndex = doStack.get(dos);
-					}
-					else
-					{
-						System.out.println("Repeat error in line : Repeat times="+fi.times);
-						System.out.println(" 	 Mismatched Do/Repeats?");
-					}
-				}
-			}
-
-			dis.close();
-		}
-		catch (IOException e)
-		{
-			throw(new RuntimeException("Error reading from script"));
-		}
-	}
+            dis.close()
+        } catch (e: IOException) {
+            throw (RuntimeException("Error reading from script"))
+        }
+    }
 }

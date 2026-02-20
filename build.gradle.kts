@@ -1,6 +1,7 @@
 plugins {
     java
     application
+    kotlin("jvm")
 }
 
 group = "com.dc3"
@@ -22,6 +23,7 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.3")
     // Ensure JUnit Platform launcher is available at runtime
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.9.3")
+    implementation(kotlin("stdlib-jdk8"))
 }
 
 application {

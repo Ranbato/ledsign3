@@ -6,189 +6,169 @@
 //  It takes care of all the storage and
 //  retrieval of letters data structure.
 //------------------------------------------------------------------------------
+package com.dc3.applet.LEDSign
 
-package com.dc3.applet.LEDSign;
+import java.io.DataInputStream
+import java.io.IOException
+import java.net.URL
+import java.net.URLConnection
 
-import java.awt.*;
-import java.io.*;
-import java.net.*;
+/**/////////////////////////////////////////////////////////////// */ // The Letters Class
+/**/////////////////////////////////////////////////////////////// */
+class Letters
+    (url: URL?, URLfile: String, width: Int) {
+    var HEIGHT: Int = 0
+    var TOTAL: Int = 0
+    var let: String? = null
+    var path: String? = null
+    var url: URL? = null
+    var urlc: URLConnection? = null
+    var dis: DataInputStream? = null
+    var w: Int = 0
+    var h: Int = 0
+    var num: Int = 0
+    var place: Int = 0
+    var len: Int = 0
+    var space: Int = 0
+    var swidth: Int = 0
+    var index: Array<Index?>? = null
 
-//////////////////////////////////////////////////////////////////
-// The Letters Class
-//////////////////////////////////////////////////////////////////
-public class Letters
-{
-	int HEIGHT,TOTAL;
-	String let;
-	String path;
-	URL url;
-	URLConnection urlc;
-	DataInputStream dis;
-	int w,h,num,place,len,space,swidth;
-	Index index[];
+    init {
+        try {
+            urlc = (URL(url, URLfile)).openConnection()
+            dis = DataInputStream(urlc!!.getInputStream())
+            path = URLfile
+            swidth = width
+        } catch (e: IOException) {
+            throw (RuntimeException("Failed to connect to host for font"))
+        }
 
-	public Letters(URL url, String URLfile, int width) throws RuntimeException
-	{
-		try {
-			urlc = (new URL(url,URLfile)).openConnection();
-			dis = new DataInputStream(urlc.getInputStream());
-			path = URLfile;
-			swidth = width;
-		} catch(IOException e) {
-			throw(new RuntimeException("Failed to connect to host for font"));
-		}
+        if (urlc!!.contentType == "text/html") throw (RuntimeException("Font not found (or inaccessible) on host"))
 
-		if(urlc.getContentType().equals("text/html"))
-			throw(new RuntimeException("Font not found (or inaccessible) on host"));
+        try {
+            initLetters()
+        } catch (e: IOException) {
+            throw (RuntimeException("Failed to read font data"))
+        }
+    }
 
-		try {
-			initLetters();
-		} catch(IOException e) {
-			throw(new RuntimeException("Failed to read font data"));
-		}
-	}
+    fun height(): Int {
+        return HEIGHT
+    }
 
-	public int height()
-	{
-		return HEIGHT;
-	}
+    @Throws(IOException::class)
+    fun initLetters() {
+        var ch: Byte
+        var j: Int
+        var k: Int
+        var s: String
+        var done: Boolean
+        var width: Int
 
-	void initLetters() throws IOException
-	{
-		int a,b,c;
-		byte ch;
-		int i,j,k;
-		String s;
-		boolean done;
-		int width;
+        w = 5
+        h = 5
+        num = 100
 
-		w = 5;
-		h = 5;
-		num = 100;
+        done = false
+        while (!done) {
+            s = dis!!.readLine()
+            if (!s.startsWith("!!")) {
+                h = s.trim().toIntOrNull() ?: 0
+                HEIGHT = h
+                done = true
+            }
+        }
 
-		done = false;
-		while(!done)
-		{
-			s = dis.readLine();
-			if(!s.startsWith("!!"))
-			{
-				h = (new Integer(s.trim())).intValue();
-				HEIGHT = h;
-				done = true;
-			}
-		}
+        done = false
+        while (!done) {
+            s = dis!!.readLine()
+            if (!s.startsWith("!!")) {
+                w = s.trim().toIntOrNull() ?: 0
+                done = true
+            }
+        }
 
-		done = false;
-		while(!done)
-		{
-			s = dis.readLine();
-			if(!s.startsWith("!!"))
-			{
-				w = (new Integer(s.trim())).intValue();
-				done = true;
-			}
-		}
+        done = false
+        while (!done) {
+            s = dis!!.readLine()
+            if (!s.startsWith("!!")) {
+                num = s.trim().toIntOrNull() ?: 0
+                done = true
+            }
+        }
 
-		done = false;
-		while(!done)
-		{
-			s = dis.readLine();
-			if(!s.startsWith("!!"))
-			{
-				num = (new Integer(s.trim())).intValue();
-				done = true;
-			}
-		}
+        index = arrayOfNulls<Index>(num + 1)
 
-		index = new Index[num+1];
+        var i: Int = 0
+        while (i < num) {
+            ch = 2
+            width = 10
 
-		for(i=0;i<num;i++)
-		{
-			ch = 2;
-			width = 10;
+            done = false
+            while (!done) {
+                s = dis!!.readLine()
+                if (!s.startsWith("!!")) {
+                    ch = s.get(0).code.toByte()
+                    done = true
+                }
+            }
+            done = false
+            while (!done) {
+                s = dis!!.readLine()
+                if (!s.startsWith("!!")) {
+                    width = s.trim().toIntOrNull() ?: 0
+                    done = true
+                }
+            }
 
-			done = false;
-			while(!done)
-			{
-				s = dis.readLine();
-				if(!s.startsWith("!!"))
-				{
-					ch = (byte)s.charAt(0);
-					done = true;
-				}
-			}
-			done = false;
-			while(!done)
-			{
-				s = dis.readLine();
-				if(!s.startsWith("!!"))
-				{
-					width = (new Integer(s.trim())).intValue();
-					done = true;
-				}
-			}
+            index!![i] = Index(ch, width, h)
 
-			index[i] = new Index(ch,width,h);
+            j = 0
+            while (j < h) {
+                done = false
+                s = ""
+                while (!done) {
+                    s = dis!!.readLine()
 
-			for(j=0;j<h;j++)
-			{
-				done = false;
-				s = "";
-				while(!done)
-				{
-					s = dis.readLine();
+                    if (s.length > 0) {
+                        if (!s.startsWith("!!")) {
+                            done = true
+                        }
+                    } else {
+                        s = " "
+                        done = true
+                    }
+                }
 
-					if(s.length() > 0)
-					{
-						if(!s.startsWith("!!"))
-						{
-							done = true;
-						}
-					}
-					else
-					{
-						s = " ";
-						done = true;
-					}
-				}
+                k = 0
+                while (k < index!![i]!!.width) {
+                    if (k >= s.length) {
+                        index!![i]!!.letter!![k]!![j] = false
+                    } else {
+                        index!![i]!!.letter!![k]!![j] = s.get(k) == '#'
+                    }
+                    k++
+                }
+                j++
+            }
+            i++
+        }
 
-				for(k=0;k<index[i].width;k++)
-				{
-					if(k>=s.length())
-					{
-						index[i].letter[k][j] = false;
-					}
-					else
-					{
-						if(s.charAt(k) == '#')
-							index[i].letter[k][j] = true;
-						else
-							index[i].letter[k][j] = false;
-					}
-				}
-			}
-		}
+        index!![num] = Index(32.toByte(), swidth, h)
 
-		index[num] = new Index((byte)32,swidth,h);
+        dis!!.close()
+    }
 
-		dis.close();
-	}
+    fun getLetter(c: Char): Index? {
+        var j: Int
 
-	public Index getLetter(char c)
-	{
-		int j;
+        if (c == (32).toChar()) {
+            j = num
+        } else {
+            j = 0
+            while (c.code.toByte() != index!![j]!!.ch && j < num) j++
+        }
 
-		if(c == (char)(32))
-		{
-			j = num;
-		}
-		else
-		{
-			j = 0;
-			while(c != index[j].ch && j < num)
-				j++;
-		}
-
-		return index[j];
-	}
+        return index!![j]
+    }
 }

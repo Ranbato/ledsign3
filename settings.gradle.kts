@@ -4,6 +4,9 @@ pluginManagement {
         mavenCentral()
         maven { url = uri("https://maven.pkg.jetbrains.space/public/p/compose/dev") }
     }
+    plugins {
+        kotlin("jvm") version "2.3.10"
+    }
 }
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version("0.7.0")

@@ -1,29 +1,30 @@
-package com.dc3.applet.LEDSign;
+package com.dc3.applet.LEDSign
 
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+import com.dc3.applet.LEDSign.LEDFunction.Companion.fromCode
+import com.dc3.applet.LEDSign.LEDFunction.Companion.fromScriptName
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
 
-public class LEDFunctionTest {
-
+class LEDFunctionTest {
     @Test
-    void fromScriptName_shouldMapKnownNames() {
-        assertEquals(LEDFunction.APPEAR, LEDFunction.fromScriptName(LEDFunction.APPEAR.getScriptName()));
-        assertEquals(LEDFunction.SLEEP, LEDFunction.fromScriptName(LEDFunction.SLEEP.getScriptName()));
-        assertEquals(LEDFunction.SCROLL_LEFT, LEDFunction.fromScriptName(LEDFunction.SCROLL_LEFT.getScriptName()));
-        assertEquals(LEDFunction.PIXEL, LEDFunction.fromScriptName(LEDFunction.PIXEL.getScriptName()));
-        assertEquals(LEDFunction.DO, LEDFunction.fromScriptName(LEDFunction.DO.getScriptName()));
-        assertEquals(LEDFunction.REPEAT, LEDFunction.fromScriptName(LEDFunction.REPEAT.getScriptName()));
+    fun fromScriptName_shouldMapKnownNames() {
+        Assertions.assertEquals(LEDFunction.APPEAR, fromScriptName(LEDFunction.APPEAR.scriptName))
+        Assertions.assertEquals(LEDFunction.SLEEP, fromScriptName(LEDFunction.SLEEP.scriptName))
+        Assertions.assertEquals(LEDFunction.SCROLL_LEFT, fromScriptName(LEDFunction.SCROLL_LEFT.scriptName))
+        Assertions.assertEquals(LEDFunction.PIXEL, fromScriptName(LEDFunction.PIXEL.scriptName))
+        Assertions.assertEquals(LEDFunction.DO, fromScriptName(LEDFunction.DO.scriptName))
+        Assertions.assertEquals(LEDFunction.REPEAT, fromScriptName(LEDFunction.REPEAT.scriptName))
     }
 
     @Test
-    void fromScriptName_shouldReturnNullForUnknown() {
-        assertNull(LEDFunction.fromScriptName("NotAFunction"));
+    fun fromScriptName_shouldReturnNullForUnknown() {
+        Assertions.assertNull(fromScriptName("NotAFunction"))
     }
 
     @Test
-    void fromCode_shouldMapKnownCodes() {
-        assertEquals(LEDFunction.APPEAR, LEDFunction.fromCode(0));
-        assertEquals(LEDFunction.RELOAD, LEDFunction.fromCode(99));
-        assertEquals(LEDFunction.CHAIN, LEDFunction.fromCode(100));
+    fun fromCode_shouldMapKnownCodes() {
+        Assertions.assertEquals(LEDFunction.APPEAR, fromCode(0))
+        Assertions.assertEquals(LEDFunction.RELOAD, fromCode(99))
+        Assertions.assertEquals(LEDFunction.CHAIN, fromCode(100))
     }
 }

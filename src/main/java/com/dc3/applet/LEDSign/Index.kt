@@ -1,18 +1,10 @@
 // ...existing code...
-package com.dc3.applet.LEDSign;
+package com.dc3.applet.LEDSign
 
-public class Index
-{
-	public byte ch;
-	public int width;
-	public boolean[][] letter;
-
-	Index(byte b, int w, int h)
-	{
-		letter = new boolean[w][h];
-		width = w;
-		ch = b;
-	}
+class Index
+internal constructor( var ch: Byte,  var width: Int, h: Int) {
+    
+	var letter: Array<BooleanArray?>? = Array(width) { BooleanArray(h) }
 }
 
 

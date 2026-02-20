@@ -1,10 +1,21 @@
-package com.dc3.applet.LEDSign;
+package com.dc3.applet.LEDSign
 
 /**
  * Enumeration of LED sign transition functions.
  * Maps function names to their numeric codes for script parsing and execution.
  */
-public enum LEDFunction {
+enum class LEDFunction(
+    /**
+     * Get the numeric code for this function.
+     * @return the function code
+     */
+    val code: Int,
+    /**
+     * Get the script name for this function.
+     * @return the function name as it appears in LED scripts
+     */
+    val scriptName: String
+) {
     APPEAR(0, "Appear"),
     SLEEP(1, "Sleep"),
     SCROLL_LEFT(2, "ScrollLeft"),
@@ -24,59 +35,37 @@ public enum LEDFunction {
     RELOAD(99, "Reload"),
     CHAIN(100, "Chain");
 
-    private final int code;
-    private final String name;
-
-    LEDFunction(int code, String name) {
-        this.code = code;
-        this.name = name;
-    }
-
-    /**
-     * Get the numeric code for this function.
-     * @return the function code
-     */
-    public int getCode() {
-        return code;
-    }
-
-    /**
-     * Get the script name for this function.
-     * @return the function name as it appears in LED scripts
-     */
-    public String getScriptName() {
-        return name;
-    }
-
-    /**
-     * Look up a function by its script name.
-     * @param scriptName the name as it appears in LED scripts
-     * @return the corresponding LEDFunction, or null if not found
-     */
-    public static LEDFunction fromScriptName(String scriptName) {
-        if (scriptName == null) {
-            return null;
-        }
-        for (LEDFunction func : LEDFunction.values()) {
-            if (func.name.equals(scriptName)) {
-                return func;
+    companion object {
+        /**
+         * Look up a function by its script name.
+         * @param scriptName the name as it appears in LED scripts
+         * @return the corresponding LEDFunction, or null if not found
+         */
+        fun fromScriptName(scriptName: String?): LEDFunction? {
+            if (scriptName == null) {
+                return null
             }
-        }
-        return null;
-    }
-
-    /**
-     * Look up a function by its numeric code.
-     * @param code the function code
-     * @return the corresponding LEDFunction, or null if not found
-     */
-    public static LEDFunction fromCode(int code) {
-        for (LEDFunction func : LEDFunction.values()) {
-            if (func.code == code) {
-                return func;
+            for (func in LEDFunction.entries) {
+                if (func.scriptName.equals(scriptName, ignoreCase = true) ) {
+                    return func
+                }
             }
+            return null
         }
-        return null;
+
+        /**
+         * Look up a function by its numeric code.
+         * @param code the function code
+         * @return the corresponding LEDFunction, or null if not found
+         */
+        fun fromCode(code: Int): LEDFunction? {
+            for (func in LEDFunction.entries) {
+                if (func.code == code) {
+                    return func
+                }
+            }
+            return null
+        }
     }
 }
 

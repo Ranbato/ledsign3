@@ -30,7 +30,7 @@ public enum LEDFunction {
     DO(97, "Do"),
     REPEAT(98, "Repeat"),
     RELOAD(99, "Reload"),
-    CHAIN(100, "Chain");
+    CHAIN(100, "Chain")
     // ... implementation
 }
 ```

@@ -1,35 +1,30 @@
-package com.dc3.applet.LEDSign;
+package com.dc3.applet.LEDSign
 
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
+import java.nio.file.Files
 
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.io.InputStream;
-
-public class ScriptParsingTest {
-
+class ScriptParsingTest {
     @Test
-    void parseSimpleScript_shouldReturnAppearFunc() throws Exception {
+    @Throws(Exception::class)
+    fun parseSimpleScript_shouldReturnAppearFunc() {
         // Copy resource test.led to a temp directory so Script can open it via URL
-        try (InputStream in = this.getClass().getResourceAsStream("/com/dc3/applet/LEDSign/test.led")) {
-            assertNotNull(in, "Test script resource not found");
+        this.javaClass.getResourceAsStream("/com/dc3/applet/LEDSign/test.led").use { `in` ->
+            Assertions.assertNotNull(`in`, "Test script resource not found")
+            val tmpDir = Files.createTempDirectory("ledsign-test")
+            tmpDir.toFile().deleteOnExit()
+            val tmpFile = tmpDir.resolve("test.led")
+            Files.copy(`in`, tmpFile)
+            tmpFile.toFile().deleteOnExit()
 
-            Path tmpDir = Files.createTempDirectory("ledsign-test");
-            tmpDir.toFile().deleteOnExit();
-            Path tmpFile = tmpDir.resolve("test.led");
-            Files.copy(in, tmpFile);
-            tmpFile.toFile().deleteOnExit();
+            val dirUrl = tmpDir.toUri().toURL()
 
-            URL dirUrl = tmpDir.toUri().toURL();
+            val script = Script(dirUrl, "test.led")
 
-            Script script = new Script(dirUrl, "test.led");
-
-            FuncInfo fi = script.nextFunc();
-            assertNotNull(fi);
-            assertEquals(LEDFunction.APPEAR, fi.func);
-            assertEquals("Hello", fi.text.trim());
+            val fi = script.nextFunc()
+            Assertions.assertNotNull(fi)
+            Assertions.assertEquals(LEDFunction.APPEAR, fi!!.func)
+            Assertions.assertEquals("Hello", fi.text!!.trim { it <= ' ' })
         }
     }
 }
